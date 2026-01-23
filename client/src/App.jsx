@@ -1,6 +1,6 @@
 import { useState, createContext, useContext } from "react";
 import { Switch, Route, Link, useLocation } from "wouter";
-import { Zap } from "lucide-react";
+import { Layers } from "lucide-react";
 
 // --- Shared State Context ---
 const AppStateContext = createContext();
@@ -450,9 +450,9 @@ function AppContent() {
           <div className="flex items-center gap-6 md:gap-12">
             <Link href="/">
               <a className="flex items-center gap-2 text-xl md:text-2xl font-bold tracking-tighter transition-all hover:brightness-110">
-                <Zap className="w-8 h-8 text-primary fill-primary/20" />
+                <Layers className="w-8 h-8 text-primary" />
                 <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                  AutoYield
+                  Strata
                 </span>
               </a>
             </Link>
