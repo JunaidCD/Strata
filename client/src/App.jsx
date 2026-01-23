@@ -254,12 +254,80 @@ const Withdraw = ({ isWalletConnected }) => {
   );
 };
 
-const History = () => (
-  <div className="flex flex-col items-center gap-4">
-    <h1 className="text-4xl font-bold tracking-tighter">History</h1>
-    <p className="text-muted-foreground">Review your transaction activity.</p>
-  </div>
-);
+const History = () => {
+  const transactions = [
+    { id: 1, type: "Deposit", amount: "15,000.00", token: "USDC", status: "Confirmed", time: "2 hours ago" },
+    { id: 2, type: "Withdraw", amount: "2,500.00", token: "USDC", status: "Confirmed", time: "1 day ago" },
+    { id: 3, type: "Deposit", amount: "50,000.00", token: "USDC", status: "Confirmed", time: "3 days ago" },
+    { id: 4, type: "Harvest", amount: "420.12", token: "USDC", status: "Confirmed", time: "5 days ago" },
+    { id: 5, type: "Deposit", amount: "75,000.00", token: "USDC", status: "Confirmed", time: "1 week ago" },
+    { id: 6, type: "Withdraw", amount: "1,200.00", token: "USDC", status: "Confirmed", time: "2 weeks ago" },
+    { id: 7, type: "Deposit", amount: "10,000.00", token: "USDC", status: "Confirmed", time: "1 month ago" },
+  ];
+
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="bg-white/[0.03] border border-white/[0.05] rounded-3xl p-8 backdrop-blur-md overflow-hidden">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight">Activity</h2>
+            <p className="text-muted-foreground text-sm">Your recent interactions with AutoYield vaults.</p>
+          </div>
+          <button className="text-xs font-bold text-primary hover:underline">Export CSV</button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-white/5 text-xs text-muted-foreground uppercase tracking-widest">
+                <th className="pb-4 font-medium">Type</th>
+                <th className="pb-4 font-medium">Amount</th>
+                <th className="pb-4 font-medium">Status</th>
+                <th className="pb-4 font-medium text-right">Time</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {transactions.map((tx) => (
+                <tr key={tx.id} className="group hover:bg-white/[0.01] transition-colors">
+                  <td className="py-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs ${
+                        tx.type === 'Deposit' ? 'bg-emerald-500/10 text-emerald-500' : 
+                        tx.type === 'Withdraw' ? 'bg-amber-500/10 text-amber-500' : 
+                        'bg-primary/10 text-primary'
+                      }`}>
+                        {tx.type[0]}
+                      </div>
+                      <span className="font-semibold">{tx.type}</span>
+                    </div>
+                  </td>
+                  <td className="py-4">
+                    <span className="font-mono text-sm">{tx.amount} {tx.token}</span>
+                  </td>
+                  <td className="py-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      <span className="text-xs text-white/80">{tx.status}</span>
+                    </div>
+                  </td>
+                  <td className="py-4 text-right">
+                    <span className="text-xs text-muted-foreground">{tx.time}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        <div className="mt-8 text-center">
+          <button className="text-sm text-muted-foreground hover:text-white transition-colors">
+            View all transactions on Etherscan
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const NavLink = ({ href, children }) => {
   const [location] = useLocation();
