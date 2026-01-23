@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route, Link, useLocation } from "wouter";
 
 const StatCard = ({ label, value, subValue, trend }) => (
@@ -21,7 +21,6 @@ const ProtocolStat = ({ label, value }) => (
 
 const Dashboard = () => (
   <div className="w-full max-w-5xl mx-auto space-y-12">
-    {/* Hero Overview */}
     <div className="relative group overflow-hidden bg-primary/5 border border-primary/10 rounded-3xl p-8 md:p-12 backdrop-blur-md">
       <div className="absolute top-0 right-0 p-8">
         <div className="bg-primary/20 text-primary px-4 py-1 rounded-full text-sm font-bold border border-primary/20 animate-pulse">
@@ -50,7 +49,6 @@ const Dashboard = () => (
           </div>
         </div>
 
-        {/* Mock Chart Area */}
         <div className="h-32 w-full flex items-end gap-1 px-2 pt-8">
           {[40, 45, 42, 48, 55, 52, 58, 62, 60, 65, 70, 68, 75, 82, 80, 85, 90, 88, 95, 100].map((h, i) => (
             <div 
@@ -62,18 +60,15 @@ const Dashboard = () => (
         </div>
       </div>
       
-      {/* Decorative background circle */}
       <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] rounded-full" />
     </div>
 
-    {/* Secondary Stats Grid */}
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <StatCard label="Available Liquidity" value="$84.2M" subValue="USDC/USDT Pool" />
       <StatCard label="Active Strategy" value="Delta Neutral" trend="OPTIMIZED" />
       <StatCard label="Next Harvest" value="14h 22m" subValue="Estimated +$420" />
     </div>
 
-    {/* Protocol Stats */}
     <div className="bg-white/[0.02] border border-white/[0.02] rounded-2xl p-8 flex flex-wrap gap-x-20 gap-y-8">
       <ProtocolStat label="Total Value Locked" value="$248.5M" />
       <ProtocolStat label="Utilization Rate" value="94.2%" />
@@ -83,12 +78,104 @@ const Dashboard = () => (
   </div>
 );
 
-const Deposit = () => (
-  <div className="flex flex-col items-center gap-4">
-    <h1 className="text-4xl font-bold tracking-tighter">Deposit</h1>
-    <p className="text-muted-foreground">Securely fund your account.</p>
-  </div>
-);
+const Deposit = ({ isWalletConnected }) => {
+  const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const handleDeposit = () => {
+    if (!amount || isNaN(amount) || amount <= 0) return;
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setSuccess(true);
+      setAmount("");
+      setTimeout(() => setSuccess(false), 3000);
+    }, 2000);
+  };
+
+  return (
+    <div className="w-full max-w-lg mx-auto">
+      <div className="bg-white/[0.03] border border-white/[0.05] rounded-3xl p-8 backdrop-blur-md space-y-8">
+        <div className="space-y-2 text-center">
+          <h2 className="text-3xl font-bold tracking-tight">Deposit Assets</h2>
+          <p className="text-muted-foreground text-sm">Add USDC to start earning automated yield.</p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="bg-black/20 border border-white/[0.05] rounded-2xl p-4 transition-focus-within ring-primary/20 focus-within:ring-2">
+            <div className="flex justify-between text-xs text-muted-foreground mb-2">
+              <span>Amount</span>
+              <span>Balance: 24,500.00 USDC</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <input 
+                type="text" 
+                placeholder="0.00"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                disabled={!isWalletConnected || loading}
+                className="bg-transparent text-3xl font-bold w-full outline-none placeholder:text-white/10 disabled:opacity-50"
+              />
+              <button 
+                onClick={() => setAmount("24500.00")}
+                disabled={!isWalletConnected || loading}
+                className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-md hover:bg-primary/20 disabled:opacity-50"
+              >
+                MAX
+              </button>
+              <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
+                <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-[10px] font-bold">S</div>
+                <span className="font-bold text-sm">USDC</span>
+              </div>
+            </div>
+          </div>
+
+          {!isWalletConnected && (
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex gap-3">
+              <div className="w-5 h-5 shrink-0 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center text-xs font-bold">!</div>
+              <p className="text-xs text-amber-200/80 leading-relaxed">
+                Wallet not connected. Please connect your wallet to interact with the vault.
+              </p>
+            </div>
+          )}
+
+          <button 
+            disabled={!isWalletConnected || loading || !amount}
+            onClick={handleDeposit}
+            className={`w-full py-4 rounded-2xl font-bold text-lg transition-all active:scale-[0.98] ${
+              loading 
+                ? "bg-primary/50 cursor-not-allowed" 
+                : "bg-primary text-primary-foreground hover:shadow-[0_0_20px_rgba(var(--primary),0.3)]"
+            } disabled:opacity-50 disabled:shadow-none`}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                Processing...
+              </span>
+            ) : success ? (
+              "Success!"
+            ) : (
+              "Deposit"
+            )}
+          </button>
+        </div>
+
+        <div className="pt-4 border-t border-white/5 space-y-3">
+          <div className="flex justify-between text-xs">
+            <span className="text-muted-foreground">Protocol Fee</span>
+            <span>0.00%</span>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span className="text-muted-foreground">Est. Annual Yield</span>
+            <span className="text-emerald-400 font-bold">+12.4%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Withdraw = () => (
   <div className="flex flex-col items-center gap-4">
@@ -120,31 +207,14 @@ const NavLink = ({ href, children }) => {
   );
 };
 
-const WalletConnect = () => {
-  const [address, setAddress] = useState(null);
-
-  const connect = () => {
-    setAddress("0x71C...3E21");
-  };
-
-  return (
-    <button 
-      onClick={connect}
-      className="px-6 py-2 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity active:scale-95"
-    >
-      {address || "Connect Wallet"}
-    </button>
-  );
-};
-
 function App() {
+  const [walletAddress, setWalletAddress] = useState(null);
+
   return (
-    <div className="min-h-screen w-full bg-background font-sans relative overflow-hidden flex flex-col items-center">
-      {/* Background decoration */}
+    <div className="min-h-screen w-full bg-background font-sans relative overflow-hidden flex flex-col items-center text-foreground">
       <div className="absolute inset-0 web3-gradient pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl border-x border-white/[0.02] pointer-events-none" />
       
-      {/* Persistent Header */}
       <header className="fixed top-0 z-50 w-full max-w-7xl px-4 sm:px-6 lg:px-8 bg-background/40 backdrop-blur-xl border-b border-white/[0.02]">
         <nav className="flex items-center justify-between h-20">
           <div className="flex items-center gap-12">
@@ -160,16 +230,22 @@ function App() {
               <NavLink href="/history">History</NavLink>
             </div>
           </div>
-          <WalletConnect />
+          <button 
+            onClick={() => setWalletAddress("0x71C...3E21")}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-opacity active:scale-95"
+          >
+            {walletAddress || "Connect Wallet"}
+          </button>
         </nav>
       </header>
 
-      {/* Main Container */}
       <main className="relative z-10 w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8 mt-20">
         <div className="py-24 flex flex-col items-center justify-center">
           <Switch>
             <Route path="/" component={Dashboard} />
-            <Route path="/deposit" component={Deposit} />
+            <Route path="/deposit">
+              <Deposit isWalletConnected={!!walletAddress} />
+            </Route>
             <Route path="/withdraw" component={Withdraw} />
             <Route path="/history" component={History} />
             <Route>
@@ -183,7 +259,6 @@ function App() {
         </div>
       </main>
 
-      {/* Subtle bottom glow */}
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
     </div>
   );
