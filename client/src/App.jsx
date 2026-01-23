@@ -177,12 +177,82 @@ const Deposit = ({ isWalletConnected }) => {
   );
 };
 
-const Withdraw = () => (
-  <div className="flex flex-col items-center gap-4">
-    <h1 className="text-4xl font-bold tracking-tighter">Withdraw</h1>
-    <p className="text-muted-foreground">Move your assets back to your wallet.</p>
-  </div>
-);
+const Withdraw = ({ isWalletConnected }) => {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
+  const handleWithdraw = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
+    }, 2000);
+  };
+
+  return (
+    <div className="w-full max-w-lg mx-auto">
+      <div className="bg-white/[0.03] border border-white/[0.05] rounded-3xl p-8 backdrop-blur-md space-y-8">
+        <div className="space-y-2 text-center">
+          <h2 className="text-3xl font-bold tracking-tight">Withdraw Assets</h2>
+          <p className="text-muted-foreground text-sm">Move your funds back to your connected wallet.</p>
+        </div>
+
+        <div className="space-y-6">
+          <div className="bg-black/20 border border-white/[0.05] rounded-2xl p-6">
+            <p className="text-xs text-muted-foreground uppercase tracking-widest mb-1">Available to Withdraw</p>
+            <h3 className="text-4xl font-bold tracking-tighter mb-6">$142,500.42</h3>
+            
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase mb-1">Principal</p>
+                <p className="text-sm font-semibold text-white/90">$139,260.30</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase mb-1">Net Yield</p>
+                <p className="text-sm font-semibold text-emerald-400">+$3,240.12</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white/5 rounded-xl p-4 flex gap-3">
+            <div className="w-5 h-5 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">i</div>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              AutoYield features <span className="text-white font-medium">zero exit fees</span> and <span className="text-white font-medium">no lockup periods</span>. Your funds are available instantly.
+            </p>
+          </div>
+
+          <button 
+            disabled={!isWalletConnected || loading}
+            onClick={handleWithdraw}
+            className={`w-full py-4 rounded-2xl font-bold text-lg transition-all active:scale-[0.98] ${
+              loading 
+                ? "bg-white/10 text-white/30 cursor-not-allowed" 
+                : "bg-white text-black hover:bg-white/90"
+            } disabled:opacity-50`}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-5 h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                Processing...
+              </span>
+            ) : success ? (
+              "Transfer Complete"
+            ) : (
+              "Withdraw Full Balance"
+            )}
+          </button>
+        </div>
+
+        {!isWalletConnected && (
+          <p className="text-center text-xs text-amber-200/60 font-medium">
+            Please connect your wallet to withdraw funds.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const History = () => (
   <div className="flex flex-col items-center gap-4">
@@ -246,7 +316,9 @@ function App() {
             <Route path="/deposit">
               <Deposit isWalletConnected={!!walletAddress} />
             </Route>
-            <Route path="/withdraw" component={Withdraw} />
+            <Route path="/withdraw">
+              <Withdraw isWalletConnected={!!walletAddress} />
+            </Route>
             <Route path="/history" component={History} />
             <Route>
               <div className="flex flex-col items-center gap-4">
