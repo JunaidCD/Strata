@@ -1,10 +1,85 @@
 import { useState } from "react";
 import { Switch, Route, Link, useLocation } from "wouter";
 
+const StatCard = ({ label, value, subValue, trend }) => (
+  <div className="bg-white/[0.03] border border-white/[0.05] rounded-2xl p-6 backdrop-blur-sm">
+    <p className="text-sm text-muted-foreground mb-2">{label}</p>
+    <div className="flex items-baseline gap-2">
+      <h3 className="text-3xl font-bold tracking-tight">{value}</h3>
+      {trend && <span className="text-xs text-emerald-400 font-medium">{trend}</span>}
+    </div>
+    {subValue && <p className="text-xs text-muted-foreground mt-1">{subValue}</p>}
+  </div>
+);
+
+const ProtocolStat = ({ label, value }) => (
+  <div className="flex flex-col gap-1">
+    <span className="text-xs text-muted-foreground uppercase tracking-wider">{label}</span>
+    <span className="text-lg font-semibold">{value}</span>
+  </div>
+);
+
 const Dashboard = () => (
-  <div className="flex flex-col items-center gap-4">
-    <h1 className="text-4xl font-bold tracking-tighter">Dashboard</h1>
-    <p className="text-muted-foreground">Welcome to your Web3 command center.</p>
+  <div className="w-full max-w-5xl mx-auto space-y-12">
+    {/* Hero Overview */}
+    <div className="relative group overflow-hidden bg-primary/5 border border-primary/10 rounded-3xl p-8 md:p-12 backdrop-blur-md">
+      <div className="absolute top-0 right-0 p-8">
+        <div className="bg-primary/20 text-primary px-4 py-1 rounded-full text-sm font-bold border border-primary/20 animate-pulse">
+          12.4% APY
+        </div>
+      </div>
+      
+      <div className="relative z-10 space-y-8">
+        <div>
+          <h2 className="text-sm font-medium text-primary uppercase tracking-[0.2em] mb-4">Vault Overview</h2>
+          <div className="flex flex-col md:flex-row md:items-end gap-8 md:gap-24">
+            <div>
+              <p className="text-muted-foreground text-sm mb-1">Total Value</p>
+              <h1 className="text-6xl font-bold tracking-tighter">$142,500.42</h1>
+            </div>
+            <div className="flex gap-12 border-l border-white/10 pl-8">
+              <div>
+                <p className="text-muted-foreground text-sm mb-1">Yield Earned</p>
+                <p className="text-2xl font-bold text-emerald-400">+$3,240.12</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-sm mb-1">Initial Deposit</p>
+                <p className="text-2xl font-semibold">$139,260.30</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mock Chart Area */}
+        <div className="h-32 w-full flex items-end gap-1 px-2 pt-8">
+          {[40, 45, 42, 48, 55, 52, 58, 62, 60, 65, 70, 68, 75, 82, 80, 85, 90, 88, 95, 100].map((h, i) => (
+            <div 
+              key={i} 
+              className="flex-1 bg-primary/20 rounded-t-sm transition-all duration-500 hover:bg-primary/40" 
+              style={{ height: `${h}%` }}
+            />
+          ))}
+        </div>
+      </div>
+      
+      {/* Decorative background circle */}
+      <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] rounded-full" />
+    </div>
+
+    {/* Secondary Stats Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <StatCard label="Available Liquidity" value="$84.2M" subValue="USDC/USDT Pool" />
+      <StatCard label="Active Strategy" value="Delta Neutral" trend="OPTIMIZED" />
+      <StatCard label="Next Harvest" value="14h 22m" subValue="Estimated +$420" />
+    </div>
+
+    {/* Protocol Stats */}
+    <div className="bg-white/[0.02] border border-white/[0.02] rounded-2xl p-8 flex flex-wrap gap-x-20 gap-y-8">
+      <ProtocolStat label="Total Value Locked" value="$248.5M" />
+      <ProtocolStat label="Utilization Rate" value="94.2%" />
+      <ProtocolStat label="Active Depositors" value="12,402" />
+      <ProtocolStat label="Safety Score" value="9.8 / 10" />
+    </div>
   </div>
 );
 
@@ -91,7 +166,7 @@ function App() {
 
       {/* Main Container */}
       <main className="relative z-10 w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8 mt-20">
-        <div className="py-24 flex flex-col items-center justify-center min-h-[60vh]">
+        <div className="py-24 flex flex-col items-center justify-center">
           <Switch>
             <Route path="/" component={Dashboard} />
             <Route path="/deposit" component={Deposit} />
