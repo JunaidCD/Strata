@@ -1,5 +1,6 @@
 import { useState, createContext, useContext } from "react";
 import { Switch, Route, Link, useLocation } from "wouter";
+import { Coins } from "lucide-react";
 
 // --- Shared State Context ---
 const AppStateContext = createContext();
@@ -448,8 +449,11 @@ function AppContent() {
         <nav className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center gap-6 md:gap-12">
             <Link href="/">
-              <a className="text-xl md:text-2xl font-bold tracking-tighter bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent transition-all hover:brightness-110">
-                AutoYield
+              <a className="flex items-center gap-2 text-xl md:text-2xl font-bold tracking-tighter transition-all hover:brightness-110">
+                <Coins className="w-8 h-8 text-primary" />
+                <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+                  AutoYield
+                </span>
               </a>
             </Link>
             <div className="hidden md:flex items-center gap-2">
