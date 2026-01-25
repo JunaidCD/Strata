@@ -420,16 +420,14 @@ const NavLink = ({ href, children }) => {
   const [location] = useLocation();
   const isActive = location === href;
   return (
-    <Link href={href}>
-      <a className={`px-4 py-2 rounded-md transition-all duration-300 relative group ${
-        isActive 
-          ? "text-primary font-medium" 
-          : "text-muted-foreground hover:text-foreground"
-      }`}>
-        {children}
-        {isActive && <div className="absolute -bottom-1 left-4 right-4 h-0.5 bg-primary rounded-full animate-in fade-in zoom-in duration-300" />}
-        {!isActive && <div className="absolute -bottom-1 left-4 right-4 h-0.5 bg-primary/0 group-hover:bg-primary/20 rounded-full transition-all duration-300" />}
-      </a>
+    <Link href={href} className={`px-4 py-2 rounded-md transition-all duration-300 relative group ${
+      isActive 
+        ? "text-primary font-medium" 
+        : "text-muted-foreground hover:text-foreground"
+    }`}>
+      {children}
+      {isActive && <div className="absolute -bottom-1 left-4 right-4 h-0.5 bg-primary rounded-full animate-in fade-in zoom-in duration-300" />}
+      {!isActive && <div className="absolute -bottom-1 left-4 right-4 h-0.5 bg-primary/0 group-hover:bg-primary/20 rounded-full transition-all duration-300" />}
     </Link>
   );
 };
@@ -448,13 +446,11 @@ function AppContent() {
       <header className="fixed top-0 z-50 w-full max-w-7xl px-4 sm:px-6 lg:px-8 bg-background/40 backdrop-blur-xl border-b border-white/[0.02]">
         <nav className="flex items-center justify-between h-16 md:h-20">
           <div className="flex items-center gap-6 md:gap-12">
-            <Link href="/">
-              <a className="flex items-center gap-2 text-xl md:text-2xl font-bold tracking-tighter transition-all hover:brightness-110">
-                <Layers className="w-8 h-8 text-primary" />
-                <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                  Strata
-                </span>
-              </a>
+            <Link href="/" className="flex items-center gap-2 text-xl md:text-2xl font-bold tracking-tighter transition-all hover:brightness-110">
+              <Layers className="w-8 h-8 text-primary" />
+              <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+                Strata
+              </span>
             </Link>
             <div className="hidden md:flex items-center gap-2">
               <NavLink href="/">Dashboard</NavLink>
@@ -486,10 +482,10 @@ function AppContent() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-16 left-0 w-full bg-background/95 backdrop-blur-xl border-b border-white/[0.05] p-6 space-y-4 animate-in slide-in-from-top-4 duration-300">
-            <Link href="/"><a onClick={() => setMobileMenuOpen(false)} className="block py-2 text-lg font-medium">Dashboard</a></Link>
-            <Link href="/deposit"><a onClick={() => setMobileMenuOpen(false)} className="block py-2 text-lg font-medium">Deposit</a></Link>
-            <Link href="/withdraw"><a onClick={() => setMobileMenuOpen(false)} className="block py-2 text-lg font-medium">Withdraw</a></Link>
-            <Link href="/history"><a onClick={() => setMobileMenuOpen(false)} className="block py-2 text-lg font-medium">History</a></Link>
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-lg font-medium">Dashboard</Link>
+            <Link href="/deposit" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-lg font-medium">Deposit</Link>
+            <Link href="/withdraw" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-lg font-medium">Withdraw</Link>
+            <Link href="/history" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-lg font-medium">History</Link>
           </div>
         )}
       </header>
@@ -505,7 +501,7 @@ function AppContent() {
               <div className="flex flex-col items-center gap-4 text-center">
                 <h1 className="text-6xl font-bold tracking-tighter text-primary">404</h1>
                 <p className="text-muted-foreground text-lg">Page not found.</p>
-                <Link href="/"><a className="bg-white/5 px-6 py-2 rounded-xl hover:bg-white/10 transition-colors">Return home</a></Link>
+                <Link href="/" className="bg-white/5 px-6 py-2 rounded-xl hover:bg-white/10 transition-colors">Return home</Link>
               </div>
             </Route>
           </Switch>
