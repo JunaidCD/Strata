@@ -1,6 +1,7 @@
 import express from "express";
+import fs from "fs";
+import path from "path";
 import { registerRoutes } from "../server/routes.js";
-import { serveStatic } from "../server/static.js";
 
 const app = express();
 
@@ -27,7 +28,7 @@ export function log(message, source = "express") {
 
 app.use((req, res, next) => {
   const start = Date.now();
-  const path = req.path;
+  const requestPath = req.path;
   let capturedJsonResponse = undefined;
 
   const originalResJson = res.json;
@@ -38,8 +39,8 @@ app.use((req, res, next) => {
 
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
+    if (requestPath.startsWith("/api")) {
+      let logLine = `${req.method} ${requestPath} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
@@ -67,19 +68,38 @@ app.use((err, _req, res, next) => {
   return res.status(status).json({ message });
 });
 
-// Serve static files in production
-// In Vercel, static files from dist/public are served automatically via outputDirectory
-// This handles SPA routing fallback
+// Handle SPA routing - serve index.html for all non-API routes
+// Static assets (JS, CSS, images) should be served directly by Vercel from dist/public
+// This handler receives requests that don't match existing static files
 if (process.env.NODE_ENV === "production" || process.env.VERCEL) {
-  try {
-    serveStatic(app);
-  } catch (err) {
-    console.warn("Static file serving setup failed:", err.message);
-    // Fallback for SPA routing - serve index.html for all non-API routes
-    app.get("*", (_req, res) => {
-      res.status(404).json({ message: "Not found" });
-    });
-  }
+  app.use((req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith("/api/")) {
+      return next();
+    }
+    
+    // Check if this is a static file request
+    const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.json', '.map', '.webp'];
+    const hasStaticExtension = staticExtensions.some(ext => req.path.toLowerCase().endsWith(ext));
+    
+    if (hasStaticExtension) {
+      // Static file should have been served by Vercel, return 404 if we reach here
+      return res.status(404).send("Static file not found");
+    }
+    
+    // Serve index.html for SPA routing with correct Content-Type
+    const distPath = path.resolve(import.meta.dirname, "..", "dist", "public");
+    const indexPath = path.resolve(distPath, "index.html");
+    
+    if (fs.existsSync(indexPath)) {
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+      return res.sendFile(indexPath);
+    } else {
+      console.error(`index.html not found at ${indexPath}. Current dir: ${import.meta.dirname}`);
+      return res.status(500).send("Build files not found. Please check the build output.");
+    }
+  });
 }
 
 // Vercel serverless function handler
