@@ -36,7 +36,6 @@ export async function setupVite(server, app) {
       const clientTemplate = path.resolve(
         import.meta.dirname,
         "..",
-        "client",
         "index.html",
       );
 
