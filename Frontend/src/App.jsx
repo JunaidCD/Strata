@@ -1,6 +1,8 @@
 import { useState, createContext, useContext } from "react";
 import { Switch, Route, Link, useLocation } from "wouter";
 import { Layers } from "lucide-react";
+import detectEthereumProvider from '@metamask/detect-provider';
+import { ethers } from 'ethers';
 
 // --- Shared State Context ---
 const AppStateContext = createContext();
@@ -9,6 +11,7 @@ export const useAppState = () => useContext(AppStateContext);
 
 const AppStateProvider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState(null);
+  const [isConnecting, setIsConnecting] = useState(false);
   const [balances, setBalances] = useState({ usdc: 24500.00 });
   const [vaultData, setVaultData] = useState({
     totalValue: 142500.42,
@@ -25,7 +28,63 @@ const AppStateProvider = ({ children }) => {
     { id: 7, type: "Deposit", amount: "10,000.00", token: "USDC", status: "Confirmed", time: "1 month ago" },
   ]);
 
-  const connectWallet = () => setWalletAddress("0x71C...3E21");
+  const connectWallet = async () => {
+    if (isConnecting) return;
+    
+    setIsConnecting(true);
+    
+    try {
+      // Detect MetaMask provider
+      const provider = await detectEthereumProvider();
+      
+      if (!provider) {
+        alert('MetaMask is not installed. Please install it to use this feature.');
+        return;
+      }
+
+      // Request account access
+      const accounts = await provider.request({
+        method: 'eth_requestAccounts'
+      });
+
+      if (accounts.length === 0) {
+        alert('No accounts found. Please connect to MetaMask.');
+        return;
+      }
+
+      // Create ethers provider and signer
+      const ethersProvider = new ethers.BrowserProvider(provider);
+      const signer = await ethersProvider.getSigner();
+      const address = await signer.getAddress();
+      
+      // Format address (show first 6 and last 4 characters)
+      const formattedAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+      
+      setWalletAddress(formattedAddress);
+      
+      // Store full address for potential future use
+      window.currentWalletAddress = address;
+      
+      console.log('Wallet connected:', address);
+      
+    } catch (error) {
+      console.error('Error connecting wallet:', error);
+      if (error.code === 4001) {
+        // User rejected the request
+        alert('Connection rejected. Please try again.');
+      } else {
+        alert('Failed to connect wallet. Please try again.');
+      }
+    } finally {
+      setIsConnecting(false);
+    }
+  };
+
+  const disconnectWallet = () => {
+    setWalletAddress(null);
+    delete window.currentWalletAddress;
+    console.log('Wallet disconnected');
+  };
 
   const addTransaction = (type, amount) => {
     const newTx = {
@@ -64,7 +123,9 @@ const AppStateProvider = ({ children }) => {
   return (
     <AppStateContext.Provider value={{
       walletAddress,
+      isConnecting,
       connectWallet,
+      disconnectWallet,
       balances,
       vaultData,
       transactions,
@@ -435,7 +496,7 @@ const NavLink = ({ href, children }) => {
 // --- App Root ---
 
 function AppContent() {
-  const { walletAddress, connectWallet } = useAppState();
+  const { walletAddress, isConnecting, connectWallet, disconnectWallet } = useAppState();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -461,12 +522,33 @@ function AppContent() {
           </div>
           
           <div className="flex items-center gap-3">
-            <button 
-              onClick={connectWallet}
-              className="px-4 py-1.5 md:px-6 md:py-2 bg-primary text-primary-foreground rounded-full text-xs md:text-sm font-medium hover:brightness-110 transition-all active:scale-95 shadow-[0_0_15px_rgba(147,51,234,0.2)]"
-            >
-              {walletAddress || "Connect Wallet"}
-            </button>
+            {walletAddress ? (
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={disconnectWallet}
+                  className="px-4 py-1.5 md:px-6 md:py-2 bg-emerald-600 text-white rounded-full text-xs md:text-sm font-medium hover:bg-emerald-700 transition-all active:scale-95 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                >
+                  {walletAddress}
+                </button>
+                <button 
+                  onClick={disconnectWallet}
+                  className="p-2 text-muted-foreground hover:text-white transition-colors"
+                  title="Disconnect Wallet"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={connectWallet}
+                disabled={isConnecting}
+                className="px-4 py-1.5 md:px-6 md:py-2 bg-primary text-primary-foreground rounded-full text-xs md:text-sm font-medium hover:brightness-110 transition-all active:scale-95 shadow-[0_0_15px_rgba(147,51,234,0.2)] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isConnecting ? "Connecting..." : "Connect Wallet"}
+              </button>
+            )}
             
             <button 
               className="md:hidden p-2 text-muted-foreground hover:text-white transition-colors"
