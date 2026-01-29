@@ -12,8 +12,8 @@ async function deploy() {
   // Read compiled contract
   const contractArtifact = JSON.parse(fs.readFileSync('artifacts/contracts/Vault.sol/Vault.json', 'utf8'));
   
-  // Mock USDC address on Sepolia
-  const USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
+  // Your custom USDC address on Sepolia
+  const USDC_ADDRESS = "0xA17201d0E98437862E0d9eDFc1D57d2d725cB939";
   
   // Create contract factory
   const vaultFactory = new ethers.ContractFactory(

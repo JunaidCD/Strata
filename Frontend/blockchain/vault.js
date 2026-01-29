@@ -46,8 +46,10 @@ export class VaultService {
     if (!this.usdcContract) {
       await this.initialize();
     }
+    const signer = this.usdcContract.runner;
+    const userAddress = await signer.getAddress();
     const allowance = await this.usdcContract.allowance(
-      web3Utils.userAddress,
+      userAddress,
       VAULT_ADDRESS
     );
     return allowance;
@@ -114,22 +116,31 @@ export class VaultService {
   // Full deposit flow: approve + deposit
   async fullDepositFlow(amount) {
     try {
+      console.log('🚀 Starting deposit flow for amount:', amount);
+      
       // Step 1: Check current allowance
       const currentAllowance = await this.getUSDCAllowance(amount);
       const parsedAmount = web3Utils.parseUSDC(amount);
       
+      console.log('📊 Current allowance:', currentAllowance.toString());
+      console.log('💰 Required amount:', parsedAmount.toString());
+      console.log('📍 Vault address:', VAULT_ADDRESS);
+      console.log('🪙 USDC address:', USDC_ADDRESS);
+      
       // Step 2: Approve if needed
       if (currentAllowance < parsedAmount) {
-        console.log('Approving USDC for vault...');
+        console.log('✅ Approving USDC for vault...');
         const approvalResult = await this.approveUSDC(amount);
         
         if (!approvalResult.success) {
           throw new Error('Approval failed');
         }
+      } else {
+        console.log('✅ Sufficient allowance already exists');
       }
       
       // Step 3: Deposit
-      console.log('Depositing USDC to vault...');
+      console.log('📥 Depositing USDC to vault...');
       const depositResult = await this.depositUSDC(amount);
       
       return {
@@ -140,7 +151,7 @@ export class VaultService {
       };
       
     } catch (error) {
-      console.error('Deposit flow error:', error);
+      console.error('❌ Deposit flow error:', error);
       return {
         success: false,
         error: error.message
