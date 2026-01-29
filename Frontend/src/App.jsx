@@ -3,6 +3,8 @@ import { Switch, Route, Link, useLocation } from "wouter";
 import { Layers } from "lucide-react";
 import detectEthereumProvider from '@metamask/detect-provider';
 import { ethers } from 'ethers';
+import { vaultService } from '../blockchain/vault.js';
+import { web3Utils } from '../blockchain/web3.js';
 
 // --- Shared State Context ---
 const AppStateContext = createContext();
@@ -224,19 +226,54 @@ const Deposit = () => {
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [txHash, setTxHash] = useState("");
 
   const isWalletConnected = !!walletAddress;
 
-  const handleDeposit = () => {
+  const handleDeposit = async () => {
     if (!amount || isNaN(amount) || amount <= 0) return;
+    
     setLoading(true);
-    setTimeout(() => {
-      deposit(amount);
+    setError("");
+    setSuccess(false);
+    setTxHash("");
+
+    try {
+      console.log('Starting deposit flow for amount:', amount);
+      
+      // Initialize vault service
+      await vaultService.initialize();
+      
+      // Execute full deposit flow (approve + deposit)
+      const result = await vaultService.fullDepositFlow(amount);
+      
+      if (result.success) {
+        console.log('Deposit successful:', result);
+        
+        // Update local state
+        deposit(amount);
+        
+        // Set success state with transaction info
+        setSuccess(true);
+        setTxHash(result.depositTxHash);
+        setAmount("");
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => setSuccess(false), 5000);
+      } else {
+        throw new Error(result.error || 'Deposit failed');
+      }
+      
+    } catch (error) {
+      console.error('Deposit error:', error);
+      setError(error.message);
+      
+      // Clear error after 5 seconds
+      setTimeout(() => setError(""), 5000);
+    } finally {
       setLoading(false);
-      setSuccess(true);
-      setAmount("");
-      setTimeout(() => setSuccess(false), 3000);
-    }, 2000);
+    }
   };
 
   return (
@@ -287,6 +324,36 @@ const Deposit = () => {
             </div>
           )}
 
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex gap-3 animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-5 h-5 shrink-0 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center text-xs font-bold">✕</div>
+              <div className="flex-1">
+                <p className="text-[10px] md:text-xs text-red-200/80 leading-relaxed">
+                  {error}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {success && txHash && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex gap-3 animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-5 h-5 shrink-0 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">✓</div>
+              <div className="flex-1">
+                <p className="text-[10px] md:text-xs text-emerald-200/80 leading-relaxed mb-2">
+                  Deposit successful! Your USDC has been added to the vault.
+                </p>
+                <a 
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] md:text-xs text-emerald-400 hover:text-emerald-300 underline transition-colors"
+                >
+                  View transaction on Etherscan
+                </a>
+              </div>
+            </div>
+          )}
+
           <button 
             disabled={!isWalletConnected || loading || !amount}
             onClick={handleDeposit}
@@ -299,10 +366,10 @@ const Deposit = () => {
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                Processing...
+                Processing transaction...
               </span>
             ) : success ? (
-              <span className="animate-in zoom-in duration-300">Success!</span>
+              <span className="animate-in zoom-in duration-300">Deposit Successful!</span>
             ) : (
               "Deposit"
             )}
