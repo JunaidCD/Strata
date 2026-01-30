@@ -1,10 +1,11 @@
-import { useState, createContext, useContext } from "react";
+import { useState, createContext, useContext, useEffect } from "react";
 import { Switch, Route, Link, useLocation } from "wouter";
 import { Layers } from "lucide-react";
 import detectEthereumProvider from '@metamask/detect-provider';
 import { ethers } from 'ethers';
 import { vaultService } from '../blockchain/vault.js';
 import { web3Utils } from '../blockchain/web3.js';
+import { VAULT_ADDRESS } from '../blockchain/contracts.js';
 
 // --- Shared State Context ---
 const AppStateContext = createContext();
@@ -395,18 +396,76 @@ const Withdraw = () => {
   const { walletAddress, vaultData, withdraw } = useAppState();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [txHash, setTxHash] = useState("");
+  const [userBalance, setUserBalance] = useState("0.00");
 
   const isWalletConnected = !!walletAddress;
+  const hasBalance = parseFloat(userBalance) > 0;
 
-  const handleWithdrawAction = () => {
-    if (vaultData.totalValue <= 0) return;
+  // Fetch user's vault balance on component mount and when wallet changes
+  useEffect(() => {
+    if (walletAddress) {
+      fetchUserBalance();
+    }
+  }, [walletAddress]);
+
+  const fetchUserBalance = async () => {
+    try {
+      await vaultService.initialize();
+      const balance = await vaultService.getVaultBalance();
+      setUserBalance(balance);
+    } catch (error) {
+      console.error('Error fetching vault balance:', error);
+    }
+  };
+
+  const handleWithdrawAction = async () => {
+    if (!hasBalance) return;
+    
     setLoading(true);
-    setTimeout(() => {
-      withdraw();
+    setError("");
+    setSuccess(false);
+    setTxHash("");
+
+    try {
+      console.log('Starting withdraw flow...');
+      
+      // Initialize vault service
+      await vaultService.initialize();
+      
+      // Execute withdraw
+      const result = await vaultService.withdrawUSDC();
+      
+      if (result.success) {
+        console.log('Withdraw successful:', result);
+        
+        // Update local state
+        const withdrawAmount = parseFloat(userBalance);
+        withdraw(withdrawAmount);
+        
+        // Reset user balance
+        setUserBalance("0.00");
+        
+        // Set success state with transaction info
+        setSuccess(true);
+        setTxHash(result.txHash);
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => setSuccess(false), 5000);
+      } else {
+        throw new Error(result.error || 'Withdraw failed');
+      }
+      
+    } catch (error) {
+      console.error('Withdraw error:', error);
+      setError(error.message);
+      
+      // Clear error after 5 seconds
+      setTimeout(() => setError(""), 5000);
+    } finally {
       setLoading(false);
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    }, 2000);
+    }
   };
 
   return (
@@ -420,19 +479,49 @@ const Withdraw = () => {
         <div className="space-y-6">
           <div className="bg-black/20 border border-white/[0.05] rounded-2xl p-6 transition-all hover:bg-black/30">
             <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest mb-1">Available to Withdraw</p>
-            <h3 className="text-3xl md:text-4xl font-bold tracking-tighter mb-6">${vaultData.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+            <h3 className="text-3xl md:text-4xl font-bold tracking-tighter mb-6">${parseFloat(userBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC</h3>
             
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
               <div>
                 <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase mb-1">Principal</p>
-                <p className="text-xs md:text-sm font-semibold text-white/90">${vaultData.initialDeposit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                <p className="text-xs md:text-sm font-semibold text-white/90">${parseFloat(userBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
               </div>
               <div>
                 <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase mb-1">Net Yield</p>
-                <p className="text-xs md:text-sm font-semibold text-emerald-400">+${vaultData.yieldEarned.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                <p className="text-xs md:text-sm font-semibold text-emerald-400">+$0.00</p>
               </div>
             </div>
           </div>
+
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex gap-3 animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-5 h-5 shrink-0 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center text-xs font-bold">✕</div>
+              <div className="flex-1">
+                <p className="text-[10px] md:text-xs text-red-200/80 leading-relaxed">
+                  {error}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {success && txHash && (
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex gap-3 animate-in fade-in zoom-in-95 duration-300">
+              <div className="w-5 h-5 shrink-0 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">✓</div>
+              <div className="flex-1">
+                <p className="text-[10px] md:text-xs text-emerald-200/80 leading-relaxed mb-2">
+                  Withdraw successful! Your USDC has been transferred back to your wallet.
+                </p>
+                <a 
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] md:text-xs text-emerald-400 hover:text-emerald-300 underline transition-colors"
+                >
+                  View transaction on Etherscan
+                </a>
+              </div>
+            </div>
+          )}
 
           <div className="bg-white/5 rounded-xl p-4 flex gap-3 border border-white/[0.02]">
             <div className="w-5 h-5 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">i</div>
@@ -442,7 +531,7 @@ const Withdraw = () => {
           </div>
 
           <button 
-            disabled={!isWalletConnected || loading || vaultData.totalValue <= 0}
+            disabled={!isWalletConnected || loading || !hasBalance}
             onClick={handleWithdrawAction}
             className={`w-full py-3 md:py-4 rounded-2xl font-bold text-base md:text-lg transition-all active:scale-[0.98] ${
               loading 
@@ -453,10 +542,10 @@ const Withdraw = () => {
             {loading ? (
               <span className="flex items-center justify-center gap-2">
                 <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                Processing...
+                Processing transaction...
               </span>
             ) : success ? (
-              <span className="animate-in zoom-in duration-300">Transfer Complete</span>
+              <span className="animate-in zoom-in duration-300">Withdrawal Complete!</span>
             ) : (
               "Withdraw Full Balance"
             )}
@@ -474,7 +563,29 @@ const Withdraw = () => {
 };
 
 const History = () => {
-  const { transactions } = useAppState();
+  const { walletAddress } = useAppState();
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch transaction history from blockchain
+  useEffect(() => {
+    if (walletAddress) {
+      fetchTransactionHistory();
+    }
+  }, [walletAddress]);
+
+  const fetchTransactionHistory = async () => {
+    setLoading(true);
+    try {
+      const { transactionHistoryService } = await import('../blockchain/history.js');
+      const history = await transactionHistoryService.getTransactionHistory(walletAddress);
+      setTransactions(history);
+    } catch (error) {
+      console.error('Error fetching transaction history:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -484,61 +595,94 @@ const History = () => {
             <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Activity</h2>
             <p className="text-muted-foreground text-xs md:text-sm">Your recent interactions with AutoYield vaults.</p>
           </div>
-          <button className="text-[10px] md:text-xs font-bold text-primary hover:text-primary/80 transition-colors bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10 hover:border-primary/20">
-            Export CSV
+          <button 
+            onClick={fetchTransactionHistory}
+            className="text-[10px] md:text-xs font-bold text-primary hover:text-primary/80 transition-colors bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10 hover:border-primary/20"
+          >
+            {loading ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
 
-        <div className="overflow-x-auto -mx-6 md:mx-0">
-          <div className="min-w-[600px] px-6 md:px-0">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-white/5 text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">
-                  <th className="pb-4 font-medium">Type</th>
-                  <th className="pb-4 font-medium">Amount</th>
-                  <th className="pb-4 font-medium">Status</th>
-                  <th className="pb-4 font-medium text-right">Time</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {transactions.map((tx) => (
-                  <tr key={tx.id} className="group hover:bg-white/[0.02] transition-colors cursor-default">
-                    <td className="py-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] md:text-xs transition-all group-hover:scale-110 ${
-                          tx.type === 'Deposit' ? 'bg-emerald-500/10 text-emerald-500' : 
-                          tx.type === 'Withdraw' ? 'bg-amber-500/10 text-amber-500' : 
-                          'bg-primary/10 text-primary'
-                        }`}>
-                          {tx.type[0]}
-                        </div>
-                        <span className="font-semibold text-sm md:text-base">{tx.type}</span>
-                      </div>
-                    </td>
-                    <td className="py-4">
-                      <span className="font-mono text-xs md:text-sm">{tx.amount} {tx.token}</span>
-                    </td>
-                    <td className="py-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                        <span className="text-[10px] md:text-xs text-white/80">{tx.status}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 text-right">
-                      <span className="text-[10px] md:text-xs text-muted-foreground">{tx.time}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
           </div>
-        </div>
-        
-        <div className="mt-8 text-center">
-          <button className="text-[10px] md:text-xs text-muted-foreground hover:text-white transition-colors underline-offset-4 hover:underline">
-            View all transactions on Etherscan
-          </button>
-        </div>
+        ) : transactions.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-sm">No transactions found</p>
+            <p className="text-muted-foreground text-xs mt-2">Deposit and withdraw USDC to see your transaction history</p>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto -mx-6 md:mx-0">
+              <div className="min-w-[600px] px-6 md:px-0">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-white/5 text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">
+                      <th className="pb-4 font-medium">Type</th>
+                      <th className="pb-4 font-medium">Amount</th>
+                      <th className="pb-4 font-medium">Status</th>
+                      <th className="pb-4 font-medium text-right">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {transactions.map((tx) => (
+                      <tr key={tx.id} className="group hover:bg-white/[0.02] transition-colors cursor-default">
+                        <td className="py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-[10px] md:text-xs transition-all group-hover:scale-110 ${
+                              tx.type === 'Deposit' ? 'bg-emerald-500/10 text-emerald-500' : 
+                              tx.type === 'Withdraw' ? 'bg-amber-500/10 text-amber-500' : 
+                              'bg-primary/10 text-primary'
+                            }`}>
+                              {tx.type[0]}
+                            </div>
+                            <div>
+                              <span className="font-semibold text-sm md:text-base">{tx.type}</span>
+                              {tx.txHash && (
+                                <a 
+                                  href={tx.etherscanUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block text-[10px] text-primary hover:text-primary/80 transition-colors"
+                                >
+                                  View on Etherscan
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4">
+                          <span className="font-mono text-xs md:text-sm">{tx.amount} {tx.token}</span>
+                        </td>
+                        <td className="py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                            <span className="text-[10px] md:text-xs text-white/80">{tx.status}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 text-right">
+                          <span className="text-[10px] md:text-xs text-muted-foreground">{tx.time}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div className="mt-8 text-center">
+              <a 
+                href={`https://sepolia.etherscan.io/address/${VAULT_ADDRESS}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[10px] md:text-xs text-muted-foreground hover:text-white transition-colors underline-offset-4 hover:underline"
+              >
+                View all transactions on Etherscan
+              </a>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

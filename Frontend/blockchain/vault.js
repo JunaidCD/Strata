@@ -113,6 +113,33 @@ export class VaultService {
     }
   }
 
+  // Withdraw all USDC from vault
+  async withdrawUSDC() {
+    if (!this.vaultContract) {
+      await this.initialize();
+    }
+
+    console.log('Withdrawing all USDC from vault...');
+    
+    const tx = await this.vaultContract.withdraw();
+    
+    console.log('Withdraw transaction hash:', tx.hash);
+    
+    // Wait for confirmation
+    const receipt = await web3Utils.waitForTransaction(tx.hash);
+    
+    if (receipt.status === 1) {
+      console.log('Withdraw successful');
+      return {
+        success: true,
+        txHash: tx.hash,
+        etherscanUrl: web3Utils.getEtherscanUrl(tx.hash)
+      };
+    } else {
+      throw new Error('Withdraw transaction failed');
+    }
+  }
+
   // Full deposit flow: approve + deposit
   async fullDepositFlow(amount) {
     try {
