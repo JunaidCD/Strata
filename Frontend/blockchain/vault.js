@@ -106,22 +106,44 @@ export class VaultService {
     console.log('📍 Vault contract address:', await this.vaultContract.getAddress());
     console.log('👤 User address:', await this.vaultContract.runner.getAddress());
     
-    const tx = await this.vaultContract.deposit(parsedAmount);
-    
-    console.log('📝 Deposit transaction hash:', tx.hash);
-    
-    // Wait for confirmation
-    const receipt = await web3Utils.waitForTransaction(tx.hash);
-    
-    if (receipt.status === 1) {
-      console.log('✅ Deposit successful');
-      return {
-        success: true,
-        txHash: tx.hash,
-        etherscanUrl: web3Utils.getEtherscanUrl(tx.hash)
-      };
-    } else {
-      throw new Error('Deposit transaction failed');
+    try {
+      const tx = await this.vaultContract.deposit(parsedAmount);
+      
+      console.log('📝 Deposit transaction hash:', tx.hash);
+      
+      // Wait for confirmation
+      const receipt = await web3Utils.waitForTransaction(tx.hash);
+      
+      if (receipt.status === 1) {
+        console.log('✅ Deposit successful');
+        return {
+          success: true,
+          txHash: tx.hash,
+          etherscanUrl: web3Utils.getEtherscanUrl(tx.hash)
+        };
+      } else {
+        throw new Error('Deposit transaction failed');
+      }
+    } catch (error) {
+      console.error('Deposit error:', error);
+      
+      // Handle various MetaMask rejection scenarios
+      if (error.code === 4001) {
+        throw new Error('Transaction cancelled by user');
+      } else if (error.code === -32603) {
+        throw new Error('Transaction was rejected');
+      } else if (error.message?.includes('rejected') || error.message?.includes('cancelled')) {
+        throw new Error('Transaction cancelled by user');
+      } else if (error.message?.includes('call revert exception')) {
+        throw new Error('Transaction was cancelled or failed');
+      } else if (error.message?.includes('execution reverted')) {
+        throw new Error('Transaction was cancelled or failed');
+      } else if (error.message?.includes('user rejected')) {
+        throw new Error('Transaction cancelled by user');
+      }
+      
+      // If it's a different error, re-throw it
+      throw error;
     }
   }
 
@@ -163,22 +185,44 @@ export class VaultService {
 
     console.log('Withdrawing all USDC from vault...');
     
-    const tx = await this.vaultContract.withdraw();
-    
-    console.log('Withdraw transaction hash:', tx.hash);
-    
-    // Wait for confirmation
-    const receipt = await web3Utils.waitForTransaction(tx.hash);
-    
-    if (receipt.status === 1) {
-      console.log('Withdraw successful');
-      return {
-        success: true,
-        txHash: tx.hash,
-        etherscanUrl: web3Utils.getEtherscanUrl(tx.hash)
-      };
-    } else {
-      throw new Error('Withdraw transaction failed');
+    try {
+      const tx = await this.vaultContract.withdraw();
+      
+      console.log('Withdraw transaction hash:', tx.hash);
+      
+      // Wait for confirmation
+      const receipt = await web3Utils.waitForTransaction(tx.hash);
+      
+      if (receipt.status === 1) {
+        console.log('Withdraw successful');
+        return {
+          success: true,
+          txHash: tx.hash,
+          etherscanUrl: web3Utils.getEtherscanUrl(tx.hash)
+        };
+      } else {
+        throw new Error('Withdraw transaction failed');
+      }
+    } catch (error) {
+      console.error('Withdraw error:', error);
+      
+      // Handle various MetaMask rejection scenarios
+      if (error.code === 4001) {
+        throw new Error('Transaction cancelled by user');
+      } else if (error.code === -32603) {
+        throw new Error('Transaction was rejected');
+      } else if (error.message?.includes('rejected') || error.message?.includes('cancelled')) {
+        throw new Error('Transaction cancelled by user');
+      } else if (error.message?.includes('call revert exception')) {
+        throw new Error('Transaction was cancelled or failed');
+      } else if (error.message?.includes('execution reverted')) {
+        throw new Error('Transaction was cancelled or failed');
+      } else if (error.message?.includes('user rejected')) {
+        throw new Error('Transaction cancelled by user');
+      }
+      
+      // If it's a different error, re-throw it
+      throw error;
     }
   }
 
@@ -243,22 +287,44 @@ export class VaultService {
 
     console.log('Approving USDC amount:', amount.toString());
     
-    const tx = await this.usdcContract.approve(VAULT_ADDRESS, amount);
-    
-    console.log('Approval transaction hash:', tx.hash);
-    
-    // Wait for confirmation
-    const receipt = await web3Utils.waitForTransaction(tx.hash);
-    
-    if (receipt.status === 1) {
-      console.log('Approval successful');
-      return {
-        success: true,
-        txHash: tx.hash,
-        etherscanUrl: web3Utils.getEtherscanUrl(tx.hash)
-      };
-    } else {
-      throw new Error('Approval transaction failed');
+    try {
+      const tx = await this.usdcContract.approve(VAULT_ADDRESS, amount);
+      
+      console.log('Approval transaction hash:', tx.hash);
+      
+      // Wait for confirmation
+      const receipt = await web3Utils.waitForTransaction(tx.hash);
+      
+      if (receipt.status === 1) {
+        console.log('Approval successful');
+        return {
+          success: true,
+          txHash: tx.hash,
+          etherscanUrl: web3Utils.getEtherscanUrl(tx.hash)
+        };
+      } else {
+        throw new Error('Approval transaction failed');
+      }
+    } catch (error) {
+      console.error('Approval error:', error);
+      
+      // Handle various MetaMask rejection scenarios
+      if (error.code === 4001) {
+        throw new Error('Transaction cancelled by user');
+      } else if (error.code === -32603) {
+        throw new Error('Transaction was rejected');
+      } else if (error.message?.includes('rejected') || error.message?.includes('cancelled')) {
+        throw new Error('Transaction cancelled by user');
+      } else if (error.message?.includes('call revert exception')) {
+        throw new Error('Transaction was cancelled or failed');
+      } else if (error.message?.includes('execution reverted')) {
+        throw new Error('Transaction was cancelled or failed');
+      } else if (error.message?.includes('user rejected')) {
+        throw new Error('Transaction cancelled by user');
+      }
+      
+      // If it's a different error, re-throw it
+      throw error;
     }
   }
 }
