@@ -37,8 +37,18 @@ export class VaultService {
     if (!this.vaultContract) {
       await this.initialize();
     }
-    const balance = await web3Utils.getVaultBalance(this.vaultContract);
-    return web3Utils.formatUSDC(balance);
+    try {
+      const signer = this.vaultContract.runner;
+      const userAddress = await signer.getAddress();
+      const balance = await this.vaultContract.getUserBalance(userAddress);
+      console.log('🔍 Raw vault balance:', balance.toString());
+      const formattedBalance = web3Utils.formatUSDC(balance);
+      console.log('💰 Formatted vault balance:', formattedBalance);
+      return formattedBalance;
+    } catch (error) {
+      console.error('Error getting vault balance:', error);
+      return "0.00";
+    }
   }
 
   // Check USDC allowance for vault
@@ -92,17 +102,19 @@ export class VaultService {
 
     const parsedAmount = web3Utils.parseUSDC(amount);
     
-    console.log('Depositing USDC amount:', parsedAmount.toString());
+    console.log('🚀 Depositing USDC amount:', parsedAmount.toString());
+    console.log('📍 Vault contract address:', await this.vaultContract.getAddress());
+    console.log('👤 User address:', await this.vaultContract.runner.getAddress());
     
     const tx = await this.vaultContract.deposit(parsedAmount);
     
-    console.log('Deposit transaction hash:', tx.hash);
+    console.log('📝 Deposit transaction hash:', tx.hash);
     
     // Wait for confirmation
     const receipt = await web3Utils.waitForTransaction(tx.hash);
     
     if (receipt.status === 1) {
-      console.log('Deposit successful');
+      console.log('✅ Deposit successful');
       return {
         success: true,
         txHash: tx.hash,
@@ -113,10 +125,40 @@ export class VaultService {
     }
   }
 
+  // Check if user has any deposits
+  async hasDeposits() {
+    if (!this.vaultContract) {
+      await this.initialize();
+    }
+    try {
+      const signer = this.vaultContract.runner;
+      const userAddress = await signer.getAddress();
+      const balance = await this.vaultContract.getUserBalance(userAddress);
+      console.log('🔍 User deposit check:', balance.toString());
+      return balance > 0n;
+    } catch (error) {
+      console.error('Error checking deposits:', error);
+      return false;
+    }
+  }
+
   // Withdraw all USDC from vault
   async withdrawUSDC() {
     if (!this.vaultContract) {
       await this.initialize();
+    }
+
+    console.log('🔍 Checking balance before withdraw...');
+    const signer = this.vaultContract.runner;
+    const userAddress = await signer.getAddress();
+    const balance = await this.vaultContract.getUserBalance(userAddress);
+    console.log('📊 User address:', userAddress);
+    console.log('💰 Vault balance (raw):', balance.toString());
+    console.log('💰 Vault balance (formatted):', web3Utils.formatUSDC(balance));
+
+    // Check if balance is greater than 0
+    if (balance <= 0n) {
+      throw new Error('No balance to withdraw in vault contract');
     }
 
     console.log('Withdrawing all USDC from vault...');
@@ -154,10 +196,12 @@ export class VaultService {
       console.log('📍 Vault address:', VAULT_ADDRESS);
       console.log('🪙 USDC address:', USDC_ADDRESS);
       
+      let approvalResult = null;
+      
       // Step 2: Approve if needed
       if (currentAllowance < parsedAmount) {
         console.log('✅ Approving USDC for vault...');
-        const approvalResult = await this.approveUSDC(amount);
+        approvalResult = await this.approveUSDC(amount);
         
         if (!approvalResult.success) {
           throw new Error('Approval failed');
@@ -172,7 +216,7 @@ export class VaultService {
       
       return {
         success: true,
-        approvalTxHash: currentAllowance < parsedAmount ? approvalResult.txHash : null,
+        approvalTxHash: approvalResult ? approvalResult.txHash : null,
         depositTxHash: depositResult.txHash,
         etherscanUrl: depositResult.etherscanUrl
       };

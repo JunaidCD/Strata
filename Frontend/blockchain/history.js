@@ -11,7 +11,13 @@ export class TransactionHistoryService {
 
   // Initialize service with provider
   async initialize() {
-    this.provider = new ethers.JsonRpcProvider('https://eth-sepolia.g.alchemy.com/v2/IIlDUJE7IyZMGuPA5wDTPDAv_2FrgPhf');
+    // Use browser provider for getting signer
+    if (typeof window !== 'undefined' && window.ethereum) {
+      this.provider = new ethers.BrowserProvider(window.ethereum);
+    } else {
+      // Fallback to read-only provider
+      this.provider = new ethers.JsonRpcProvider('https://eth-sepolia.g.alchemy.com/v2/IIlDUJE7IyZMGuPA5wDTPDAv_2FrgPhf');
+    }
     this.vaultContract = getVaultContract(this.provider);
   }
 
@@ -24,20 +30,41 @@ export class TransactionHistoryService {
     try {
       console.log('🔍 Fetching transaction history for:', userAddress);
 
-      // Get deposit events
-      const depositEvents = await this.vaultContract.queryFilter(
-        this.vaultContract.filters.Deposited(userAddress),
-        -10000 // Last 10000 blocks
+      // Get the full address from the connected wallet
+      const signer = await this.provider.getSigner();
+      const fullAddress = await signer.getAddress();
+      console.log('📍 Full address for events:', fullAddress);
+
+      // Create filters for the specific user
+      const depositFilter = this.vaultContract.filters.Deposited(fullAddress);
+      const withdrawFilter = this.vaultContract.filters.Withdrawn(fullAddress);
+      
+      console.log('📋 Deposit filter:', depositFilter);
+      console.log('📋 Withdraw filter:', withdrawFilter);
+
+      // Get events for the specific user
+      const depositEvents = await this.vaultContract.queryFilter(depositFilter, -10000);
+      const withdrawEvents = await this.vaultContract.queryFilter(withdrawFilter, -10000);
+
+      console.log('📊 Found deposit events:', depositEvents.length);
+      console.log('📊 Found withdraw events:', withdrawEvents.length);
+
+      // Filter additional safety - ensure events belong to the user
+      const userDepositEvents = depositEvents.filter(event => 
+        event.args && event.args.user && 
+        event.args.user.toLowerCase() === fullAddress.toLowerCase()
+      );
+      
+      const userWithdrawEvents = withdrawEvents.filter(event => 
+        event.args && event.args.user && 
+        event.args.user.toLowerCase() === fullAddress.toLowerCase()
       );
 
-      // Get withdraw events
-      const withdrawEvents = await this.vaultContract.queryFilter(
-        this.vaultContract.filters.Withdrawn(userAddress),
-        -10000 // Last 10000 blocks
-      );
+      console.log('📊 Filtered deposit events:', userDepositEvents.length);
+      console.log('📊 Filtered withdraw events:', userWithdrawEvents.length);
 
       // Combine and format events
-      const allEvents = [...depositEvents, ...withdrawEvents];
+      const allEvents = [...userDepositEvents, ...userWithdrawEvents];
       
       // Sort by timestamp (newest first)
       const sortedEvents = allEvents.sort((a, b) => b.blockNumber - a.blockNumber);
@@ -59,7 +86,7 @@ export class TransactionHistoryService {
         };
       });
 
-      console.log('📊 Found transactions:', transactions.length);
+      console.log('📊 Formatted transactions:', transactions.length);
       return transactions;
 
     } catch (error) {

@@ -1,4 +1,4 @@
-import { useState, createContext, useContext, useEffect } from "react";
+import { useState, createContext, useContext, useEffect, useRef } from "react";
 import { Switch, Route, Link, useLocation } from "wouter";
 import { Layers } from "lucide-react";
 import detectEthereumProvider from '@metamask/detect-provider';
@@ -410,13 +410,39 @@ const Withdraw = () => {
     }
   }, [walletAddress]);
 
+  // Debounced balance refresh to prevent excessive calls
+  const balanceTimeoutRef = useRef(null);
+  
+  useEffect(() => {
+    if (walletAddress && vaultData.totalValue > 0) {
+      // Clear existing timeout
+      if (balanceTimeoutRef.current) {
+        clearTimeout(balanceTimeoutRef.current);
+      }
+      
+      // Set new timeout for balance refresh
+      balanceTimeoutRef.current = setTimeout(() => {
+        fetchUserBalance();
+      }, 1000); // 1 second delay
+    }
+    
+    // Cleanup timeout on unmount
+    return () => {
+      if (balanceTimeoutRef.current) {
+        clearTimeout(balanceTimeoutRef.current);
+      }
+    };
+  }, [vaultData.totalValue, walletAddress]);
+
   const fetchUserBalance = async () => {
     try {
       await vaultService.initialize();
       const balance = await vaultService.getVaultBalance();
+      console.log('📊 Setting user balance to:', balance);
       setUserBalance(balance);
     } catch (error) {
       console.error('Error fetching vault balance:', error);
+      setUserBalance("0.00");
     }
   };
 
@@ -478,8 +504,18 @@ const Withdraw = () => {
 
         <div className="space-y-6">
           <div className="bg-black/20 border border-white/[0.05] rounded-2xl p-6 transition-all hover:bg-black/30">
-            <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest mb-1">Available to Withdraw</p>
-            <h3 className="text-3xl md:text-4xl font-bold tracking-tighter mb-6">${parseFloat(userBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC</h3>
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest mb-1">Available to Withdraw</p>
+                <h3 className="text-3xl md:text-4xl font-bold tracking-tighter">${parseFloat(userBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC</h3>
+              </div>
+              <button 
+                onClick={fetchUserBalance}
+                className="text-[10px] md:text-xs text-primary hover:text-primary/80 transition-colors bg-primary/5 px-2 py-1 rounded-lg border border-primary/10 hover:border-primary/20"
+              >
+                Refresh
+              </button>
+            </div>
             
             <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
               <div>
