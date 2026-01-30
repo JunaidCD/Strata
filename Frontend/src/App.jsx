@@ -229,6 +229,7 @@ const Deposit = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const [txHash, setTxHash] = useState("");
+  const [loadingStage, setLoadingStage] = useState(""); // "approving" or "depositing"
 
   const isWalletConnected = !!walletAddress;
 
@@ -239,6 +240,7 @@ const Deposit = () => {
     setError("");
     setSuccess(false);
     setTxHash("");
+    setLoadingStage("");
 
     try {
       console.log('Starting deposit flow for amount:', amount);
@@ -274,6 +276,7 @@ const Deposit = () => {
       setTimeout(() => setError(""), 5000);
     } finally {
       setLoading(false);
+      setLoadingStage("");
     }
   };
 

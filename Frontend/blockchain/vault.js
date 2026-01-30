@@ -198,16 +198,20 @@ export class VaultService {
       
       let approvalResult = null;
       
-      // Step 2: Approve if needed
+      // Step 2: Approve if needed (with buffer for future deposits)
       if (currentAllowance < parsedAmount) {
-        console.log('✅ Approving USDC for vault...');
-        approvalResult = await this.approveUSDC(amount);
+        console.log('✅ Approval needed - requesting permission...');
+        
+        // Approve with a buffer (10x the amount) to avoid frequent approvals
+        const bufferAmount = parsedAmount * 10n;
+        approvalResult = await this.approveUSDCWithAmount(bufferAmount);
         
         if (!approvalResult.success) {
           throw new Error('Approval failed');
         }
+        console.log('✅ Approval granted with buffer for future deposits');
       } else {
-        console.log('✅ Sufficient allowance already exists');
+        console.log('✅ Sufficient allowance already exists - skipping approval');
       }
       
       // Step 3: Deposit
@@ -218,7 +222,8 @@ export class VaultService {
         success: true,
         approvalTxHash: approvalResult ? approvalResult.txHash : null,
         depositTxHash: depositResult.txHash,
-        etherscanUrl: depositResult.etherscanUrl
+        etherscanUrl: depositResult.etherscanUrl,
+        skippedApproval: !approvalResult
       };
       
     } catch (error) {
@@ -227,6 +232,33 @@ export class VaultService {
         success: false,
         error: error.message
       };
+    }
+  }
+
+  // Approve USDC with specific amount
+  async approveUSDCWithAmount(amount) {
+    if (!this.usdcContract) {
+      await this.initialize();
+    }
+
+    console.log('Approving USDC amount:', amount.toString());
+    
+    const tx = await this.usdcContract.approve(VAULT_ADDRESS, amount);
+    
+    console.log('Approval transaction hash:', tx.hash);
+    
+    // Wait for confirmation
+    const receipt = await web3Utils.waitForTransaction(tx.hash);
+    
+    if (receipt.status === 1) {
+      console.log('Approval successful');
+      return {
+        success: true,
+        txHash: tx.hash,
+        etherscanUrl: web3Utils.getEtherscanUrl(tx.hash)
+      };
+    } else {
+      throw new Error('Approval transaction failed');
     }
   }
 }
