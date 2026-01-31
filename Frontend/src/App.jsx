@@ -716,7 +716,7 @@ const Withdraw = () => {
                   </div>
                   <div>
                     <p className="text-white font-medium text-sm">No Lockup Periods</p>
-                    <p className="text-slate-400 text-xs mt-1">Capital remains liquid at all times</p>
+                    <p className="text-slate-400 text-xs mt-1">Capital remains <span className="text-emerald-400 font-medium">liquid at all times</span></p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -727,7 +727,7 @@ const Withdraw = () => {
                   </div>
                   <div>
                     <p className="text-white font-medium text-sm">Zero Exit Fees</p>
-                    <p className="text-slate-400 text-xs mt-1">No penalties for withdrawal</p>
+                    <p className="text-slate-400 text-xs mt-1"><span className="text-blue-400 font-medium">No penalties</span> for withdrawal</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -738,7 +738,7 @@ const Withdraw = () => {
                   </div>
                   <div>
                     <p className="text-white font-medium text-sm">Instant Processing</p>
-                    <p className="text-slate-400 text-xs mt-1">Immediate fund transfer on approval</p>
+                    <p className="text-slate-400 text-xs mt-1"><span className="text-purple-400 font-medium">Immediate fund transfer</span> on approval</p>
                   </div>
                 </div>
               </div>
@@ -750,19 +750,19 @@ const Withdraw = () => {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-400">Network</span>
-                  <span className="text-slate-300 font-medium">Ethereum Sepolia</span>
+                  <span className="text-indigo-400 font-medium">Ethereum Sepolia</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-400">Estimated Gas</span>
-                  <span className="text-slate-300 font-medium">~$0.50</span>
+                  <span className="text-orange-400 font-medium">~$0.50</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-400">Confirmation Time</span>
-                  <span className="text-slate-300 font-medium">~2 minutes</span>
+                  <span className="text-cyan-400 font-medium">~2 minutes</span>
                 </div>
                 <div className="pt-3 border-t border-slate-800/50">
                   <p className="text-slate-500 text-xs leading-relaxed">
-                    Withdrawals are processed as single transactions that transfer your entire balance back to your wallet.
+                    Withdrawals are processed as <span className="text-violet-400 font-medium">single transactions</span> that transfer your entire balance back to your wallet.
                   </p>
                 </div>
               </div>
@@ -775,17 +775,17 @@ const Withdraw = () => {
                 <div>
                   <p className="text-white font-medium text-sm mb-2">Withdrawal Events</p>
                   <p className="text-slate-400 text-xs leading-relaxed">
-                    Each withdrawal may have tax implications. Consult with a tax professional for guidance on your specific situation.
+                    Each withdrawal may have <span className="text-amber-400 font-medium">tax implications</span>. Consult with a tax professional for guidance on your specific situation.
                   </p>
                 </div>
                 <div className="pt-3 border-t border-slate-800/50">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-400">Cost Basis</span>
-                    <span className="text-slate-300 font-medium">Tracked</span>
+                    <span className="text-green-400 font-medium">Tracked</span>
                   </div>
                   <div className="flex justify-between text-sm mt-2">
                     <span className="text-slate-400">Yield Reporting</span>
-                    <span className="text-slate-300 font-medium">Available</span>
+                    <span className="text-teal-400 font-medium">Available</span>
                   </div>
                 </div>
               </div>
@@ -795,10 +795,10 @@ const Withdraw = () => {
             <div className="bg-slate-900/30 border border-slate-800/30 rounded-2xl p-6">
               <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">Important Notes</h3>
               <div className="space-y-2 text-sm text-slate-400">
-                <p>• Withdrawals transfer full balance including earned yield</p>
-                <p>• Network gas fees apply to each withdrawal transaction</p>
-                <p>• Yield calculations stop at withdrawal execution time</p>
-                <p>• Consider market timing for optimal withdrawal strategy</p>
+                <p>• Withdrawals transfer <span className="text-blue-300 font-medium">full balance</span> including earned yield</p>
+                <p>• <span className="text-purple-300 font-medium">Network gas fees</span> apply to each withdrawal transaction</p>
+                <p>• Yield calculations stop at <span className="text-pink-300 font-medium">withdrawal execution time</span></p>
+                <p>• Consider <span className="text-yellow-300 font-medium">market timing</span> for optimal withdrawal strategy</p>
               </div>
             </div>
           </div>
