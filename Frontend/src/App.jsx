@@ -290,11 +290,11 @@ const Deposit = () => {
         </div>
 
         {/* Split Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 rounded-[3rem] p-8 bg-slate-900/30 border border-slate-800/30 backdrop-blur-sm">
           {/* Primary Action Area - 2 columns */}
           <div className="lg:col-span-2 space-y-8">
             {/* Capital Input Section */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-2xl p-8 backdrop-blur-sm">
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[3rem] p-8 backdrop-blur-sm">
               <div className="space-y-6">
                 {/* Input Header */}
                 <div className="flex items-center justify-between">
@@ -594,11 +594,11 @@ const Withdraw = () => {
         </div>
 
         {/* Split Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12 rounded-[3rem] p-8 bg-slate-900/30 border border-slate-800/30 backdrop-blur-sm">
           {/* Primary Action Area - 2 columns */}
           <div className="lg:col-span-2 space-y-8">
             {/* Balance Display Section */}
-            <div className="bg-slate-900/50 border border-slate-800/50 rounded-2xl p-8 backdrop-blur-sm">
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-[3rem] p-8 backdrop-blur-sm">
               <div className="space-y-6">
                 {/* Balance Header */}
                 <div className="flex items-center justify-between">
