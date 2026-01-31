@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 
 export const SEPOLIA_NETWORK_ID = 11155111;
 export const USDC_ADDRESS = "0xA17201d0E98437862E0d9eDFc1D57d2d725cB939";
-export const VAULT_ADDRESS = "0xBeBc535673363b43390D45896090B49AFE6D9F77"; // Updated with withdraw functionality
+export const VAULT_ADDRESS = "0xeb854514bfBee690c58dE5fC571f41b5CCc4EeA9"; // Updated with withdraw functionality
 
 // USDC ABI (minimal for what we need)
 export const USDC_ABI = [

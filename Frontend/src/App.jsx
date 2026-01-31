@@ -281,113 +281,200 @@ const Deposit = () => {
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-white/[0.03] border border-white/[0.05] rounded-3xl p-6 md:p-8 backdrop-blur-md space-y-8">
-        <div className="space-y-2 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Deposit Assets</h2>
-          <p className="text-muted-foreground text-xs md:text-sm">Add USDC to start earning automated yield.</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Page Header */}
+        <div className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-light text-white mb-3">Capital Allocation</h1>
+          <p className="text-lg text-slate-400">Allocate USDC to the automated yield strategy vault</p>
         </div>
 
-        <div className="space-y-4">
-          <div className="bg-black/20 border border-white/[0.05] rounded-2xl p-4 transition-all duration-200 ring-primary/0 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/20">
-            <div className="flex justify-between text-[10px] md:text-xs text-muted-foreground mb-2">
-              <span>Amount</span>
-              <span className="hover:text-primary cursor-pointer transition-colors" onClick={() => setAmount(balances.usdc.toString())}>
-                Balance: {balances.usdc.toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <input 
-                type="text" 
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                disabled={!isWalletConnected || loading}
-                className="bg-transparent text-2xl md:text-3xl font-bold w-full outline-none placeholder:text-white/10 disabled:opacity-50 transition-opacity"
-              />
-              <button 
-                onClick={() => setAmount(balances.usdc.toString())}
-                disabled={!isWalletConnected || loading}
-                className="px-3 py-1 bg-primary/10 text-primary text-[10px] md:text-xs font-bold rounded-md hover:bg-primary/20 disabled:opacity-50 transition-all hover:scale-105"
-              >
-                MAX
-              </button>
-              <div className="flex items-center gap-2 bg-white/5 px-2 md:px-3 py-1.5 rounded-xl border border-white/5 shrink-0">
-                <div className="w-4 h-4 md:w-5 md:h-5 bg-blue-500 rounded-full flex items-center justify-center text-[8px] md:text-[10px] font-bold">S</div>
-                <span className="font-bold text-xs md:text-sm">USDC</span>
-              </div>
-            </div>
-          </div>
+        {/* Split Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+          {/* Primary Action Area - 2 columns */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Capital Input Section */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-2xl p-8 backdrop-blur-sm">
+              <div className="space-y-6">
+                {/* Input Header */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium text-slate-400 uppercase tracking-wider">Deposit Amount</label>
+                    <p className="text-slate-500 text-sm mt-1">Enter capital to allocate</p>
+                  </div>
+                  <button 
+                    onClick={() => setAmount(balances.usdc.toString())}
+                    disabled={!isWalletConnected || loading}
+                    className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors disabled:opacity-50"
+                  >
+                    Available: {balances.usdc.toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC
+                  </button>
+                </div>
 
-          {!isWalletConnected && (
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 flex gap-3 animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-5 h-5 shrink-0 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center text-xs font-bold">!</div>
-              <p className="text-[10px] md:text-xs text-amber-200/80 leading-relaxed">
-                Wallet not connected. Please connect your wallet to interact with the vault.
-              </p>
-            </div>
-          )}
+                {/* Main Input Area */}
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+                  <div className="flex items-end gap-4">
+                    <div className="flex-1">
+                      <input 
+                        type="text" 
+                        placeholder="0.00"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        disabled={!isWalletConnected || loading}
+                        className="w-full bg-transparent text-6xl md:text-7xl font-light text-white outline-none placeholder:text-slate-600 disabled:opacity-50"
+                      />
+                    </div>
+                    <div className="flex items-center gap-3 pb-2">
+                      <button 
+                        onClick={() => setAmount(balances.usdc.toString())}
+                        disabled={!isWalletConnected || loading}
+                        className="px-4 py-2 bg-slate-700/50 text-slate-300 text-sm font-medium rounded-lg hover:bg-slate-700/70 disabled:opacity-50 transition-all"
+                      >
+                        MAX
+                      </button>
+                      <div className="flex items-center gap-2 px-3 py-2 bg-slate-700/30 rounded-lg">
+                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                          <span className="text-[8px] font-bold text-white">$</span>
+                        </div>
+                        <span className="font-medium text-white">USDC</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex gap-3 animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-5 h-5 shrink-0 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center text-xs font-bold">✕</div>
-              <div className="flex-1">
-                <p className="text-[10px] md:text-xs text-red-200/80 leading-relaxed">
-                  {error}
-                </p>
-              </div>
-            </div>
-          )}
+                {/* Status Messages */}
+                {!isWalletConnected && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                    <p className="text-amber-200 text-sm font-medium">Connect wallet to allocate capital</p>
+                  </div>
+                )}
 
-          {success && txHash && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex gap-3 animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-5 h-5 shrink-0 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">✓</div>
-              <div className="flex-1">
-                <p className="text-[10px] md:text-xs text-emerald-200/80 leading-relaxed mb-2">
-                  Deposit successful! Your USDC has been added to the vault.
-                </p>
-                <a 
-                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] md:text-xs text-emerald-400 hover:text-emerald-300 underline transition-colors"
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                    <p className="text-red-200 text-sm font-medium">{error}</p>
+                  </div>
+                )}
+
+                {success && txHash && (
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+                    <p className="text-emerald-200 text-sm font-medium mb-2">Capital allocated successfully</p>
+                    <a 
+                      href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-400 text-sm hover:text-emerald-300 transition-colors"
+                    >
+                      View transaction →
+                    </a>
+                  </div>
+                )}
+
+                {/* Allocation Confirmation */}
+                <button 
+                  disabled={!isWalletConnected || loading || !amount}
+                  onClick={handleDeposit}
+                  className={`w-full py-4 rounded-xl font-medium text-lg transition-all duration-300 ${
+                    loading 
+                      ? "bg-slate-700/50 text-slate-400 cursor-not-allowed" 
+                      : "bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  }`}
                 >
-                  View transaction on Etherscan
-                </a>
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Processing allocation...
+                    </span>
+                  ) : success ? (
+                    "Allocation Confirmed"
+                  ) : (
+                    "Allocate Capital"
+                  )}
+                </button>
               </div>
             </div>
-          )}
-
-          <button 
-            disabled={!isWalletConnected || loading || !amount}
-            onClick={handleDeposit}
-            className={`w-full py-3 md:py-4 rounded-2xl font-bold text-base md:text-lg transition-all active:scale-[0.98] ${
-              loading 
-                ? "bg-primary/50 cursor-not-allowed" 
-                : "bg-primary text-primary-foreground hover:shadow-[0_0_20px_rgba(147,51,234,0.3)] hover:brightness-110"
-            } disabled:opacity-30 disabled:shadow-none disabled:hover:brightness-100`}
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                Processing transaction...
-              </span>
-            ) : success ? (
-              <span className="animate-in zoom-in duration-300">Deposit Successful!</span>
-            ) : (
-              "Deposit"
-            )}
-          </button>
-        </div>
-
-        <div className="pt-4 border-t border-white/5 space-y-3">
-          <div className="flex justify-between text-[10px] md:text-xs">
-            <span className="text-muted-foreground">Protocol Fee</span>
-            <span>0.00%</span>
           </div>
-          <div className="flex justify-between text-[10px] md:text-xs">
-            <span className="text-muted-foreground">Est. Annual Yield</span>
-            <span className="text-emerald-400 font-bold">+12.4%</span>
+
+          {/* Secondary Context Area - 1 column */}
+          <div className="space-y-6">
+            {/* Strategy Overview */}
+            <div className="bg-slate-900/30 border border-slate-800/30 rounded-2xl p-6">
+              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">Active Strategy</h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-white font-medium">Automated Yield Optimization</p>
+                  <p className="text-slate-400 text-sm mt-1">Multi-strategy allocation across <span className="text-purple-400 font-medium">DeFi protocols</span></p>
+                </div>
+                <div className="pt-3 border-t border-slate-800/50">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400">Risk Profile</span>
+                    <span className="text-emerald-400 font-medium">Conservative</span>
+                  </div>
+                  <div className="flex justify-between text-sm mt-2">
+                    <span className="text-slate-400">Rebalancing</span>
+                    <span className="text-blue-400 font-medium">Automated</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Yield Projections */}
+            <div className="bg-slate-900/30 border border-slate-800/30 rounded-2xl p-6">
+              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">Yield Projections</h3>
+              <div className="space-y-3">
+                <div>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-slate-400 text-sm">Expected APY</span>
+                    <span className="text-2xl font-light text-white">8.4% - 14.2%</span>
+                  </div>
+                  <p className="text-slate-500 text-xs mt-1">Variable based on <span className="text-amber-400 font-medium">market conditions</span></p>
+                </div>
+                <div className="pt-3 border-t border-slate-800/50">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400">Historical Average</span>
+                    <span className="text-green-400 font-medium">12.4%</span>
+                  </div>
+                  <div className="flex justify-between text-sm mt-2">
+                    <span className="text-slate-400">30-Day Volatility</span>
+                    <span className="text-cyan-400 font-medium">Low</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Market Context */}
+            <div className="bg-slate-900/30 border border-slate-800/30 rounded-2xl p-6">
+              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">Vault Context</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Total Assets</span>
+                  <span className="text-indigo-400 font-medium">$2.4M</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Utilization</span>
+                  <span className="text-orange-400 font-medium">87%</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Liquidity Depth</span>
+                  <span className="text-teal-400 font-medium">High</span>
+                </div>
+                <div className="pt-3 border-t border-slate-800/50">
+                  <p className="text-slate-500 text-xs leading-relaxed">
+                    Capital is deployed across <span className="text-violet-400 font-medium">multiple liquidity pools</span> and <span className="text-pink-400 font-medium">lending protocols</span> to optimize yield while maintaining risk parameters.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Risk Information */}
+            <div className="bg-slate-900/30 border border-slate-800/30 rounded-2xl p-6">
+              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">Risk Considerations</h3>
+              <div className="space-y-2 text-sm text-slate-400">
+                <p>• <span className="text-blue-300 font-medium">Smart contract risk</span> mitigated by audits</p>
+                <p>• <span className="text-purple-300 font-medium">Impermanent loss</span> managed through rebalancing</p>
+                <p>• <span className="text-green-300 font-medium">Protocol diversification</span> reduces concentration risk</p>
+                <p>• <span className="text-amber-300 font-medium">No lockup periods</span> - capital remains liquid</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -498,104 +585,224 @@ const Withdraw = () => {
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="bg-white/[0.03] border border-white/[0.05] rounded-3xl p-6 md:p-8 backdrop-blur-md space-y-8">
-        <div className="space-y-2 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold tracking-tight">Withdraw Assets</h2>
-          <p className="text-muted-foreground text-xs md:text-sm">Move your funds back to your connected wallet.</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        {/* Page Header */}
+        <div className="mb-12">
+          <h1 className="text-4xl md:text-5xl font-light text-white mb-3">Capital Control</h1>
+          <p className="text-lg text-slate-400">Withdraw capital from the automated yield strategy vault</p>
         </div>
 
-        <div className="space-y-6">
-          <div className="bg-black/20 border border-white/[0.05] rounded-2xl p-6 transition-all hover:bg-black/30">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest mb-1">Available to Withdraw</p>
-                <h3 className="text-3xl md:text-4xl font-bold tracking-tighter">${parseFloat(userBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })} USDC</h3>
-              </div>
-              <button 
-                onClick={fetchUserBalance}
-                className="text-[10px] md:text-xs text-primary hover:text-primary/80 transition-colors bg-primary/5 px-2 py-1 rounded-lg border border-primary/10 hover:border-primary/20"
-              >
-                Refresh
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
-              <div>
-                <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase mb-1">Principal</p>
-                <p className="text-xs md:text-sm font-semibold text-white/90">${parseFloat(userBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-              </div>
-              <div>
-                <p className="text-[9px] md:text-[10px] text-muted-foreground uppercase mb-1">Net Yield</p>
-                <p className="text-xs md:text-sm font-semibold text-emerald-400">+$0.00</p>
-              </div>
-            </div>
-          </div>
+        {/* Split Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+          {/* Primary Action Area - 2 columns */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Balance Display Section */}
+            <div className="bg-slate-900/50 border border-slate-800/50 rounded-2xl p-8 backdrop-blur-sm">
+              <div className="space-y-6">
+                {/* Balance Header */}
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="text-sm font-medium text-slate-400 uppercase tracking-wider">Available Capital</label>
+                    <p className="text-slate-500 text-sm mt-1">Total withdrawable amount</p>
+                  </div>
+                  <button 
+                    onClick={fetchUserBalance}
+                    disabled={!isWalletConnected || loading}
+                    className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors disabled:opacity-50"
+                  >
+                    Refresh Balance
+                  </button>
+                </div>
 
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex gap-3 animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-5 h-5 shrink-0 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center text-xs font-bold">✕</div>
-              <div className="flex-1">
-                <p className="text-[10px] md:text-xs text-red-200/80 leading-relaxed">
-                  {error}
-                </p>
-              </div>
-            </div>
-          )}
+                {/* Main Balance Display */}
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-6">
+                  <div className="space-y-4">
+                    <div className="text-6xl md:text-7xl font-light text-white">
+                      ${parseFloat(userBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                        <span className="text-[8px] font-bold text-white">$</span>
+                      </div>
+                      <span className="font-medium text-white">USDC</span>
+                    </div>
+                  </div>
+                </div>
 
-          {success && txHash && (
-            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex gap-3 animate-in fade-in zoom-in-95 duration-300">
-              <div className="w-5 h-5 shrink-0 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xs font-bold">✓</div>
-              <div className="flex-1">
-                <p className="text-[10px] md:text-xs text-emerald-200/80 leading-relaxed mb-2">
-                  Withdraw successful! Your USDC has been transferred back to your wallet.
-                </p>
-                <a 
-                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] md:text-xs text-emerald-400 hover:text-emerald-300 underline transition-colors"
+                {/* Balance Breakdown */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-4">
+                    <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-2">Principal</p>
+                    <p className="text-2xl font-light text-white">
+                      ${parseFloat(userBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className="text-slate-500 text-xs mt-1">Initial deposit</p>
+                  </div>
+                  <div className="bg-slate-800/30 border border-slate-700/30 rounded-xl p-4">
+                    <p className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-2">Yield Earned</p>
+                    <p className="text-2xl font-light text-emerald-400">
+                      +$0.00
+                    </p>
+                    <p className="text-slate-500 text-xs mt-1">Generated returns</p>
+                  </div>
+                </div>
+
+                {/* Status Messages */}
+                {!isWalletConnected && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                    <p className="text-amber-200 text-sm font-medium">Connect wallet to withdraw capital</p>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                    <p className="text-red-200 text-sm font-medium">{error}</p>
+                  </div>
+                )}
+
+                {success && txHash && (
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
+                    <p className="text-emerald-200 text-sm font-medium mb-2">Capital withdrawn successfully</p>
+                    <a 
+                      href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-emerald-400 text-sm hover:text-emerald-300 transition-colors"
+                    >
+                      View transaction →
+                    </a>
+                  </div>
+                )}
+
+                {/* Withdraw Confirmation */}
+                <button 
+                  disabled={!isWalletConnected || loading || !hasBalance}
+                  onClick={handleWithdrawAction}
+                  className={`w-full py-4 rounded-xl font-medium text-lg transition-all duration-300 ${
+                    loading 
+                      ? "bg-slate-700/50 text-slate-400 cursor-not-allowed" 
+                      : "bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  }`}
                 >
-                  View transaction on Etherscan
-                </a>
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Processing withdrawal...
+                    </span>
+                  ) : success ? (
+                    "Withdrawal Complete"
+                  ) : hasBalance ? (
+                    "Withdraw Full Balance"
+                  ) : (
+                    "No Capital to Withdraw"
+                  )}
+                </button>
               </div>
             </div>
-          )}
-
-          <div className="bg-white/5 rounded-xl p-4 flex gap-3 border border-white/[0.02]">
-            <div className="w-5 h-5 shrink-0 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">i</div>
-            <p className="text-[10px] md:text-xs text-muted-foreground leading-relaxed">
-              AutoYield features <span className="text-white font-medium">zero exit fees</span> and <span className="text-white font-medium">no lockup periods</span>. Your funds are available instantly.
-            </p>
           </div>
 
-          <button 
-            disabled={!isWalletConnected || loading || !hasBalance}
-            onClick={handleWithdrawAction}
-            className={`w-full py-3 md:py-4 rounded-2xl font-bold text-base md:text-lg transition-all active:scale-[0.98] ${
-              loading 
-                ? "bg-white/10 text-white/30 cursor-not-allowed" 
-                : "bg-white text-black hover:bg-white/90 hover:shadow-lg"
-            } disabled:opacity-30`}
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 md:w-5 md:h-5 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-                Processing transaction...
-              </span>
-            ) : success ? (
-              <span className="animate-in zoom-in duration-300">Withdrawal Complete!</span>
-            ) : (
-              "Withdraw Full Balance"
-            )}
-          </button>
-        </div>
+          {/* Secondary Context Area - 1 column */}
+          <div className="space-y-6">
+            {/* Withdrawal Terms */}
+            <div className="bg-slate-900/30 border border-slate-800/30 rounded-2xl p-6">
+              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">Withdrawal Terms</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium text-sm">No Lockup Periods</p>
+                    <p className="text-slate-400 text-xs mt-1">Capital remains liquid at all times</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Zero Exit Fees</p>
+                    <p className="text-slate-400 text-xs mt-1">No penalties for withdrawal</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Instant Processing</p>
+                    <p className="text-slate-400 text-xs mt-1">Immediate fund transfer on approval</p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        {!isWalletConnected && (
-          <p className="text-center text-[10px] md:text-xs text-amber-200/60 font-medium">
-            Please connect your wallet to withdraw funds.
-          </p>
-        )}
+            {/* Network Information */}
+            <div className="bg-slate-900/30 border border-slate-800/30 rounded-2xl p-6">
+              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">Network Details</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Network</span>
+                  <span className="text-slate-300 font-medium">Ethereum Sepolia</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Estimated Gas</span>
+                  <span className="text-slate-300 font-medium">~$0.50</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Confirmation Time</span>
+                  <span className="text-slate-300 font-medium">~2 minutes</span>
+                </div>
+                <div className="pt-3 border-t border-slate-800/50">
+                  <p className="text-slate-500 text-xs leading-relaxed">
+                    Withdrawals are processed as single transactions that transfer your entire balance back to your wallet.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tax Information */}
+            <div className="bg-slate-900/30 border border-slate-800/30 rounded-2xl p-6">
+              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">Tax Considerations</h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-white font-medium text-sm mb-2">Withdrawal Events</p>
+                  <p className="text-slate-400 text-xs leading-relaxed">
+                    Each withdrawal may have tax implications. Consult with a tax professional for guidance on your specific situation.
+                  </p>
+                </div>
+                <div className="pt-3 border-t border-slate-800/50">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-400">Cost Basis</span>
+                    <span className="text-slate-300 font-medium">Tracked</span>
+                  </div>
+                  <div className="flex justify-between text-sm mt-2">
+                    <span className="text-slate-400">Yield Reporting</span>
+                    <span className="text-slate-300 font-medium">Available</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Risk Information */}
+            <div className="bg-slate-900/30 border border-slate-800/30 rounded-2xl p-6">
+              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider mb-4">Important Notes</h3>
+              <div className="space-y-2 text-sm text-slate-400">
+                <p>• Withdrawals transfer full balance including earned yield</p>
+                <p>• Network gas fees apply to each withdrawal transaction</p>
+                <p>• Yield calculations stop at withdrawal execution time</p>
+                <p>• Consider market timing for optimal withdrawal strategy</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
