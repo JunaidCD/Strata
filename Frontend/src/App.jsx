@@ -527,12 +527,37 @@ const Withdraw = () => {
   const fetchUserBalance = async () => {
     try {
       await vaultService.initialize();
-      const balance = await vaultService.getVaultBalance();
-      console.log('📊 Setting user balance to:', balance);
-      setUserBalance(balance);
+      
+      // Get principal balance (user's deposited amount)
+      const principal = await vaultService.getVaultBalance();
+      console.log('📊 User principal balance:', principal);
+      
+      // Get withdrawable balance (principal + accrued yield)
+      const withdrawable = await vaultService.getWithdrawableBalance();
+      console.log('💰 User withdrawable balance:', withdrawable);
+      
+      // Get accrued yield
+      const yieldAmount = await vaultService.getUserYield();
+      console.log('🌱 User accrued yield:', yieldAmount);
+      
+      // Update user balance to show withdrawable amount
+      setUserBalance(withdrawable);
+      
+      // Update vault data with real values
+      setVaultData({
+        totalValue: parseFloat(withdrawable),
+        yieldEarned: parseFloat(yieldAmount),
+        initialDeposit: parseFloat(principal)
+      });
+      
     } catch (error) {
       console.error('Error fetching vault balance:', error);
       setUserBalance("0.00");
+      setVaultData({
+        totalValue: 0,
+        yieldEarned: 0,
+        initialDeposit: 0
+      });
     }
   };
 

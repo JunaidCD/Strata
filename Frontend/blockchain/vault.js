@@ -1,12 +1,13 @@
-// Vault service for handling deposit operations
+// Vault service for handling deposit operations with Aave integration
 import { ethers } from 'ethers';
 import { web3Utils } from './web3.js';
-import { USDC_ADDRESS, VAULT_ADDRESS, getUSDCContract, getVaultContract } from './contracts.js';
+import { USDC_ADDRESS, VAULT_V2_ADDRESS, getUSDCContract, getVaultV2Contract, getAUsdcContract } from './contracts.js';
 
 export class VaultService {
   constructor() {
     this.usdcContract = null;
     this.vaultContract = null;
+    this.aUsdcContract = null;
   }
 
   // Initialize contracts after wallet connection
@@ -15,11 +16,13 @@ export class VaultService {
     
     // Initialize contracts with signer for transactions
     this.usdcContract = getUSDCContract(signer);
-    this.vaultContract = getVaultContract(signer);
+    this.vaultContract = getVaultV2Contract(signer);
+    this.aUsdcContract = getAUsdcContract(signer);
     
     return {
       usdcContract: this.usdcContract,
-      vaultContract: this.vaultContract
+      vaultContract: this.vaultContract,
+      aUsdcContract: this.aUsdcContract
     };
   }
 
@@ -32,7 +35,7 @@ export class VaultService {
     return web3Utils.formatUSDC(balance);
   }
 
-  // Get vault balance
+  // Get vault principal balance (user's deposited amount)
   async getVaultBalance() {
     if (!this.vaultContract) {
       await this.initialize();
@@ -41,12 +44,67 @@ export class VaultService {
       const signer = this.vaultContract.runner;
       const userAddress = await signer.getAddress();
       const balance = await this.vaultContract.getUserBalance(userAddress);
-      console.log('🔍 Raw vault balance:', balance.toString());
+      console.log('🔍 Raw vault principal balance:', balance.toString());
       const formattedBalance = web3Utils.formatUSDC(balance);
-      console.log('💰 Formatted vault balance:', formattedBalance);
+      console.log('💰 Formatted vault principal balance:', formattedBalance);
       return formattedBalance;
     } catch (error) {
       console.error('Error getting vault balance:', error);
+      return "0.00";
+    }
+  }
+
+  // Get user's withdrawable balance (principal + accrued yield)
+  async getWithdrawableBalance() {
+    if (!this.vaultContract) {
+      await this.initialize();
+    }
+    try {
+      const signer = this.vaultContract.runner;
+      const userAddress = await signer.getAddress();
+      const withdrawableBalance = await this.vaultContract.getUserWithdrawableBalance(userAddress);
+      console.log('🔍 Raw withdrawable balance:', withdrawableBalance.toString());
+      const formattedBalance = web3Utils.formatUSDC(withdrawableBalance);
+      console.log('💰 Formatted withdrawable balance:', formattedBalance);
+      return formattedBalance;
+    } catch (error) {
+      console.error('Error getting withdrawable balance:', error);
+      return "0.00";
+    }
+  }
+
+  // Get user's accrued yield
+  async getUserYield() {
+    if (!this.vaultContract) {
+      await this.initialize();
+    }
+    try {
+      const signer = this.vaultContract.runner;
+      const userAddress = await signer.getAddress();
+      const yieldAmount = await this.vaultContract.getUserYield(userAddress);
+      console.log('🔍 Raw user yield:', yieldAmount.toString());
+      const formattedYield = web3Utils.formatUSDC(yieldAmount);
+      console.log('💰 Formatted user yield:', formattedYield);
+      return formattedYield;
+    } catch (error) {
+      console.error('Error getting user yield:', error);
+      return "0.00";
+    }
+  }
+
+  // Get total vault value (all users' principal + yield)
+  async getTotalVaultValue() {
+    if (!this.vaultContract) {
+      await this.initialize();
+    }
+    try {
+      const totalValue = await this.vaultContract.getTotalValue();
+      console.log('🔍 Raw total vault value:', totalValue.toString());
+      const formattedValue = web3Utils.formatUSDC(totalValue);
+      console.log('💰 Formatted total vault value:', formattedValue);
+      return formattedValue;
+    } catch (error) {
+      console.error('Error getting total vault value:', error);
       return "0.00";
     }
   }
@@ -60,7 +118,7 @@ export class VaultService {
     const userAddress = await signer.getAddress();
     const allowance = await this.usdcContract.allowance(
       userAddress,
-      VAULT_ADDRESS
+      VAULT_V2_ADDRESS
     );
     return allowance;
   }
@@ -75,7 +133,7 @@ export class VaultService {
     
     console.log('Approving USDC amount:', parsedAmount.toString());
     
-    const tx = await this.usdcContract.approve(VAULT_ADDRESS, parsedAmount);
+    const tx = await this.usdcContract.approve(VAULT_V2_ADDRESS, parsedAmount);
     
     console.log('Approval transaction hash:', tx.hash);
     
@@ -94,7 +152,7 @@ export class VaultService {
     }
   }
 
-  // Deposit USDC to vault
+  // Deposit USDC to vault (will be automatically supplied to Aave)
   async depositUSDC(amount) {
     if (!this.vaultContract) {
       await this.initialize();
@@ -103,7 +161,7 @@ export class VaultService {
     const parsedAmount = web3Utils.parseUSDC(amount);
     
     console.log('🚀 Depositing USDC amount:', parsedAmount.toString());
-    console.log('📍 Vault contract address:', await this.vaultContract.getAddress());
+    console.log('📍 Vault v2 contract address:', await this.vaultContract.getAddress());
     console.log('👤 User address:', await this.vaultContract.runner.getAddress());
     
     try {
@@ -115,7 +173,7 @@ export class VaultService {
       const receipt = await web3Utils.waitForTransaction(tx.hash);
       
       if (receipt.status === 1) {
-        console.log('✅ Deposit successful');
+        console.log('✅ Deposit successful - USDC supplied to Aave');
         return {
           success: true,
           txHash: tx.hash,
@@ -164,7 +222,7 @@ export class VaultService {
     }
   }
 
-  // Withdraw all USDC from vault
+  // Withdraw all USDC from vault (will withdraw from Aave and return principal + yield)
   async withdrawUSDC() {
     if (!this.vaultContract) {
       await this.initialize();
@@ -173,17 +231,21 @@ export class VaultService {
     console.log('🔍 Checking balance before withdraw...');
     const signer = this.vaultContract.runner;
     const userAddress = await signer.getAddress();
-    const balance = await this.vaultContract.getUserBalance(userAddress);
+    const principal = await this.vaultContract.getUserBalance(userAddress);
+    const withdrawable = await this.vaultContract.getUserWithdrawableBalance(userAddress);
+    
     console.log('📊 User address:', userAddress);
-    console.log('💰 Vault balance (raw):', balance.toString());
-    console.log('💰 Vault balance (formatted):', web3Utils.formatUSDC(balance));
+    console.log('💰 Principal (raw):', principal.toString());
+    console.log('💰 Withdrawable (raw):', withdrawable.toString());
+    console.log('💰 Principal (formatted):', web3Utils.formatUSDC(principal));
+    console.log('💰 Withdrawable (formatted):', web3Utils.formatUSDC(withdrawable));
 
     // Check if balance is greater than 0
-    if (balance <= 0n) {
+    if (principal <= 0n) {
       throw new Error('No balance to withdraw in vault contract');
     }
 
-    console.log('Withdrawing all USDC from vault...');
+    console.log('Withdrawing all USDC from vault (principal + yield from Aave)...');
     
     try {
       const tx = await this.vaultContract.withdraw();
@@ -194,7 +256,7 @@ export class VaultService {
       const receipt = await web3Utils.waitForTransaction(tx.hash);
       
       if (receipt.status === 1) {
-        console.log('Withdraw successful');
+        console.log('✅ Withdraw successful - received USDC + yield from Aave');
         return {
           success: true,
           txHash: tx.hash,
@@ -237,7 +299,7 @@ export class VaultService {
       
       console.log('📊 Current allowance:', currentAllowance.toString());
       console.log('💰 Required amount:', parsedAmount.toString());
-      console.log('📍 Vault address:', VAULT_ADDRESS);
+      console.log('📍 Vault v2 address:', VAULT_V2_ADDRESS);
       console.log('🪙 USDC address:', USDC_ADDRESS);
       
       let approvalResult = null;
@@ -259,7 +321,7 @@ export class VaultService {
       }
       
       // Step 3: Deposit
-      console.log('📥 Depositing USDC to vault...');
+      console.log('📥 Depositing USDC to vault (will supply to Aave)...');
       const depositResult = await this.depositUSDC(amount);
       
       return {
@@ -288,7 +350,7 @@ export class VaultService {
     console.log('Approving USDC amount:', amount.toString());
     
     try {
-      const tx = await this.usdcContract.approve(VAULT_ADDRESS, amount);
+      const tx = await this.usdcContract.approve(VAULT_V2_ADDRESS, amount);
       
       console.log('Approval transaction hash:', tx.hash);
       

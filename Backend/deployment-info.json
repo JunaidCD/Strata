@@ -1,6 +1,6 @@
 {
   "network": "sepolia",
-  "vaultAddress": "0xeb854514bfBee690c58dE5fC571f41b5CCc4EeA9",
+  "vaultAddress": "0x77Dc064B3c846eC77FD5F2EaBeC88510cBBBA602",
   "usdcAddress": "0xA17201d0E98437862E0d9eDFc1D57d2d725cB939",
-  "deployedAt": "2026-01-31T15:02:03.923Z"
+  "deployedAt": "2026-02-02T13:36:26.580Z"
 }
