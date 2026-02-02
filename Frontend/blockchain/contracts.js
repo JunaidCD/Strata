@@ -3,23 +3,24 @@ import { ethers } from 'ethers';
 
 export const SEPOLIA_NETWORK_ID = 11155111;
 export const USDC_ADDRESS = "0xA17201d0E98437862E0d9eDFc1D57d2d725cB939";
-export const VAULT_V1_ADDRESS = "0xeb854514bfBee690c58dE5fC571f41b5CCc4EeA9"; // Vault v1 (deprecated)
-export const VAULT_V2_ADDRESS = "0x77Dc064B3c846eC77FD5F2EaBeC88510cBBBA602"; // TODO: Deploy your own VaultV2 and update this address
+export const VAULT_V2_ADDRESS = "0x06f9e5FE81B482aceDDF13A7B63caf1a645416F0"; // Vault V2 Fixed (working withdraw)
 
 // Aave Protocol Addresses (Sepolia)
 export const AAVE_POOL_ADDRESS = "0x6Ae43d5257286e850D7572924237F96BdC3d9eA6"; // Aave Pool on Sepolia
 export const AUSDC_ADDRESS = "0x5414bD0882B4646B5A778350B1c84AB69e627735"; // aUSDC (interest-bearing USDC) on Sepolia
 
-// USDC ABI (minimal for what we need)
+// USDC ABI (your Mock USDC on Sepolia)
 export const USDC_ABI = [
   "function name() view returns (string)",
   "function symbol() view returns (string)",
   "function decimals() view returns (uint8)",
   "function balanceOf(address) view returns (uint256)",
+  "function transfer(address to, uint256 amount) returns (bool)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function allowance(address owner, address spender) view returns (uint256)",
-  "function transfer(address to, uint256 amount) returns (bool)",
-  "function transferFrom(address from, address to, uint256 amount) returns (bool)"
+  "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+  "function faucet() external", // Mock USDC faucet
+  "function mint(address to, uint256 amount) external" // Mock USDC mint
 ];
 
 // Vault v2 ABI (with Aave integration)

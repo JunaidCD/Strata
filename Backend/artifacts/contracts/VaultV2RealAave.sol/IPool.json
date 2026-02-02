@@ -1,7 +1,7 @@
 {
   "_format": "hh3-artifact-1",
   "contractName": "IPool",
-  "sourceName": "contracts/VaultV2.sol",
+  "sourceName": "contracts/VaultV2RealAave.sol",
   "abi": [
     {
       "inputs": [
@@ -66,6 +66,6 @@
   "linkReferences": {},
   "deployedLinkReferences": {},
   "immutableReferences": {},
-  "inputSourceName": "project/contracts/VaultV2.sol",
+  "inputSourceName": "project/contracts/VaultV2RealAave.sol",
   "buildInfoId": "solc-0_8_20-9426c5dbf43211ee9fff9d39bc45a6c4628d64aa"
 }

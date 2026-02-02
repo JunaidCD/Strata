@@ -504,7 +504,7 @@ const Withdraw = () => {
   const balanceTimeoutRef = useRef(null);
   
   useEffect(() => {
-    if (walletAddress && vaultData.totalValue > 0) {
+    if (walletAddress) {
       // Clear existing timeout
       if (balanceTimeoutRef.current) {
         clearTimeout(balanceTimeoutRef.current);
@@ -522,7 +522,7 @@ const Withdraw = () => {
         clearTimeout(balanceTimeoutRef.current);
       }
     };
-  }, [vaultData.totalValue, walletAddress]);
+  }, [walletAddress]);
 
   const fetchUserBalance = async () => {
     try {
@@ -543,21 +543,9 @@ const Withdraw = () => {
       // Update user balance to show withdrawable amount
       setUserBalance(withdrawable);
       
-      // Update vault data with real values
-      setVaultData({
-        totalValue: parseFloat(withdrawable),
-        yieldEarned: parseFloat(yieldAmount),
-        initialDeposit: parseFloat(principal)
-      });
-      
     } catch (error) {
       console.error('Error fetching vault balance:', error);
       setUserBalance("0.00");
-      setVaultData({
-        totalValue: 0,
-        yieldEarned: 0,
-        initialDeposit: 0
-      });
     }
   };
 
