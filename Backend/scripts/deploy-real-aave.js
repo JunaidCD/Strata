@@ -13,16 +13,13 @@ async function main() {
   // Real USDC address on Sepolia
   const REAL_USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
   
-  // Real Aave Pool address on Sepolia
-  const AAVE_POOL_ADDRESS = "0x6Ae43d5257286e850D7572924237F96BdC3d9eA6".toLowerCase();
-  
   // Read contract artifacts
   const vaultV2Artifact = JSON.parse(readFileSync("./artifacts/contracts/VaultV2RealAave.sol/VaultV2RealAave.json", "utf8"));
   
   // Deploy Real Aave Vault
   console.log("\n🏦 Deploying Real Aave Vault...");
   const VaultV2RealAave = new ethers.ContractFactory(vaultV2Artifact.abi, vaultV2Artifact.bytecode, wallet);
-  const vaultV2 = await VaultV2RealAave.deploy(REAL_USDC_ADDRESS, AAVE_POOL_ADDRESS);
+  const vaultV2 = await VaultV2RealAave.deploy(REAL_USDC_ADDRESS);
   await vaultV2.waitForDeployment();
   const vaultV2Address = await vaultV2.getAddress();
   console.log("✅ Real Aave Vault deployed to:", vaultV2Address);

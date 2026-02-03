@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 
 export const SEPOLIA_NETWORK_ID = 11155111;
 export const USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"; // Real USDC on Sepolia
-export const VAULT_V2_ADDRESS = "0xa6f7305eB9e74B557081996bcA3fa49343d34DE9"; // Real Aave Vault (with error handling)
+export const VAULT_V2_ADDRESS = " 0xc890A510B424216C9bf5D38B11A67324b3C6C5dE"; // Real Aave Vault (CORRECT Aave Pool)
 
 // Aave Protocol Addresses (Sepolia)
 export const AAVE_POOL_ADDRESS = "0x6Ae43d5257286e850D7572924237F96BdC3d9eA6"; // Aave Pool on Sepolia

@@ -25,9 +25,10 @@ contract VaultV2RealAave is ReentrancyGuard {
     event Deposited(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     
-    constructor(address _usdcToken, address _aavePool) {
+    constructor(address _usdcToken) {
         usdcToken = IERC20(_usdcToken);
-        aavePool = IPool(_aavePool);
+        // Correct Sepolia Aave V3 Pool address from official Aave Address Book
+        aavePool = IPool(0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951);
         
         // aUSDC address on Sepolia
         aUsdcToken = IERC20(0x5414bd0882B4646B5A778350B1C84AB69E627735);
