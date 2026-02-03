@@ -2,8 +2,8 @@
 import { ethers } from 'ethers';
 
 export const SEPOLIA_NETWORK_ID = 11155111;
-export const USDC_ADDRESS = "0xA17201d0E98437862E0d9eDFc1D57d2d725cB939";
-export const VAULT_V2_ADDRESS = "0x06f9e5FE81B482aceDDF13A7B63caf1a645416F0"; // Vault V2 Fixed (working withdraw)
+export const USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"; // Real USDC on Sepolia
+export const VAULT_V2_ADDRESS = "0xa6f7305eB9e74B557081996bcA3fa49343d34DE9"; // Real Aave Vault (with error handling)
 
 // Aave Protocol Addresses (Sepolia)
 export const AAVE_POOL_ADDRESS = "0x6Ae43d5257286e850D7572924237F96BdC3d9eA6"; // Aave Pool on Sepolia
