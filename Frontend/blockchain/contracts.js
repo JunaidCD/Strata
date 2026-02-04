@@ -2,14 +2,14 @@
 import { ethers } from 'ethers';
 
 export const SEPOLIA_NETWORK_ID = 11155111;
-export const USDC_ADDRESS = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"; // Real USDC on Sepolia
-export const VAULT_V2_ADDRESS = " 0xc890A510B424216C9bf5D38B11A67324b3C6C5dE"; // Real Aave Vault (CORRECT Aave Pool)
+export const USDC_ADDRESS = "0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357"; // Real DAI on Sepolia (supported in Aave)
+export const VAULT_V2_ADDRESS = "0xD90Fe2EF9c2e356257b632893bf9cae6275a4a3c"; // Real Aave Vault (DAI version)
 
 // Aave Protocol Addresses (Sepolia)
 export const AAVE_POOL_ADDRESS = "0x6Ae43d5257286e850D7572924237F96BdC3d9eA6"; // Aave Pool on Sepolia
-export const AUSDC_ADDRESS = "0x5414bD0882B4646B5A778350B1c84AB69e627735"; // aUSDC (interest-bearing USDC) on Sepolia
+export const AUSDC_ADDRESS = "0x00000000000000000299E1616d458215Bb2f7CC8"; // aDAI (interest-bearing DAI) on Sepolia
 
-// USDC ABI (your Mock USDC on Sepolia)
+// DAI ABI (ERC20 standard)
 export const USDC_ABI = [
   "function name() view returns (string)",
   "function symbol() view returns (string)",
@@ -18,15 +18,13 @@ export const USDC_ABI = [
   "function transfer(address to, uint256 amount) returns (bool)",
   "function approve(address spender, uint256 amount) returns (bool)",
   "function allowance(address owner, address spender) view returns (uint256)",
-  "function transferFrom(address from, address to, uint256 amount) returns (bool)",
-  "function faucet() external", // Mock USDC faucet
-  "function mint(address to, uint256 amount) external" // Mock USDC mint
+  "function transferFrom(address from, address to, uint256 amount) returns (bool)"
 ];
 
 // Vault v2 ABI (with Aave integration)
 export const VAULT_V2_ABI = [
-  "function usdcToken() view returns (address)",
-  "function aUsdcToken() view returns (address)",
+  "function daiToken() view returns (address)",
+  "function aDaiToken() view returns (address)",
   "function aavePool() view returns (address)",
   "function userBalances(address) view returns (uint256)",
   "function deposit(uint256 amount)",
